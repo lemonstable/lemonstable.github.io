@@ -1,0 +1,502 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>esp8266 接入homeassistant的实践 | 桜紺狸の部落阁</title><meta name="keywords" content="桜紺狸の精选记录集,esp8266,单片机"><meta name="author" content="桜紺狸"><meta name="copyright" content="桜紺狸"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="esp8266 接入homeassistant的实践"><meta name="application-name" content="esp8266 接入homeassistant的实践"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="esp8266 接入homeassistant的实践"><meta property="og:url" content="https://www.skira.top/archives/6a16f043/index.html"><meta property="og:site_name" content="桜紺狸の部落阁"><meta property="og:description" content="开始由于柠萌最近淘宝手里有很多小券就打算想找个便宜又好玩的东西玩。正好b站最近总是给咱推esp8266系列以及单片机的视频。手就很刺挠了，入了一块玩玩，就有了今天的教程记录了。 1.esp8266 配合homeassistant实现温湿度实时显示（保姆级教程）esphome的搭建（基于群晖7.2do"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://pic.skira.top/Skirafile/20241005.webp"><meta property="article:author" content="桜紺狸"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://pic.skira.top/Skirafile/20241005.webp"><meta name="description" content="开始由于柠萌最近淘宝手里有很多小券就打算想找个便宜又好玩的东西玩。正好b站最近总是给咱推esp8266系列以及单片机的视频。手就很刺挠了，入了一块玩玩，就有了今天的教程记录了。 1.esp8266 配合homeassistant实现温湿度实时显示（保姆级教程）esphome的搭建（基于群晖7.2do"><link rel="shortcut icon" href="/img/skira.ico"><link rel="canonical" href="https://www.skira.top/archives/6a16f043/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/swiper/swiper.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: {"enable":true,"title":"与数百名博主无限进步","addFriendPlaceholder":"昵称（请勿包含博客等字样）：\n网站地址（要求博客地址，请勿提交个人主页）：\n头像图片url（请提供尽可能清晰的图片，我会上传到我自己的图床）：\n描述：\n站点截图（可选）：\n"},
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"Sakira","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: {"enable":true,"default":"晚上好👋","list":[{"greeting":"晚安😴","startTime":0,"endTime":5},{"greeting":"早上好鸭👋, 祝你一天好心情！","startTime":6,"endTime":9},{"greeting":"上午好👋, 状态很好，鼓励一下～","startTime":10,"endTime":10},{"greeting":"11点多啦, 在坚持一下就吃饭啦～","startTime":11,"endTime":11},{"greeting":"午安👋, 宝贝","startTime":12,"endTime":14},{"greeting":"🌈充实的一天辛苦啦！","startTime":14,"endTime":18},{"greeting":"19点喽, 奖励一顿丰盛的大餐吧🍔。","startTime":19,"endTime":19},{"greeting":"晚上好👋, 在属于自己的时间好好放松😌~","startTime":20,"endTime":24}]},
+  twikooEnvId: 'https://twikoo.skira.top/',
+  commentBarrageConfig:{"enable":true,"maxBarrage":1,"barrageTime":4000,"accessToken":"","mailMd5":""},
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: {"mode":"api","api":"https://imc.lemonbuluo.eu.org/api?img=","cover_change":true},
+  authorStatus: undefined,
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"It has been","messageNext":"days since the last update, the content of the article may be outdated."},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":true,"limitCount":150,"languages":{"author":"作者: 桜紺狸","link":"链接: ","source":"来源: 桜紺狸の部落阁","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: '桜紺狸の部落阁',
+  title: 'esp8266 接入homeassistant的实践',
+  postAI: '',
+  pageFillDescription: '开始, 1.esp8266 配合homeassistant实现温湿度实时显示（保姆级教程）, esphome的搭建（基于群晖7.2docker配置）, 与homeassistant进行绑定, homeassistant的搭建（基于群晖7.2docker配置）, 将esphome绑定到homeassistant, 2.esp8266使用mos管模块控制小灯实现pwm无极调光, 准备材料, 所需代码, 线路连接, 总结开始由于柠萌最近淘宝手里有很多小券就打算想找个便宜又好玩的东西玩正好站最近总是给咱推系列以及单片机的视频手就很刺挠了入了一块玩玩就有了今天的教程记录了配合实现温湿度实时显示保姆级教程的搭建基于群晖配置打开后点击注册表这里的话由于在国内被墙需要科学上网输入下载最新版本即可在端口这里本地端口就行变量这里内务必填写好你的用户名和密码即可部署完毕你的机器内网端口号输入即可进入的界面用户名和密码填你在的配置的即可首次进入的话不会有左上角的的一个栏是空白的状态点击右下角的绿色标识后弹出下面如图的弹窗点击在这里的话是输入配置文件的名称可以随便输入柠萌这里的话就默认填好了输入完毕后会弹出设备选项选弹出这个话就是配置好了底下会显示一串的密钥请务必保存好之后点击即可点击接下来我们来配置一下文件点击这里是默认所给出的配置文件我们需要改一下内容这里的话有必要讲解一下内容前面这些这些数值都不要动按照默认的来按需加入内容这里填你自己的名称和密码这里填写固定的地址以及路由器的地址这里写自己所与杜邦线连接的引脚我这里的话是这样接在的随便一个引脚都可以只需在配置文件里改正即可你的名称你的密码设置固定控制添加了这行就可以在网页端打开设备设置传感器数据每监测一次点击保存点击选项这里的话柠萌就展示第二种安装方法在这个步骤里可能等待的时间过于漫长但还是请耐心等待直到显示出后点击下载所要烧录的文件下载完毕后点击跳转页面此时将你的连接上电脑的口此时勾选的端口点击将刚刚下载的文件导入即可开始烧录等待进度条跑完此时就可以输入你在配置文件所填写的地址即可进入到烧录在的界面此时如果能正常显示温湿度那么在基于上的配置就已经完毕了与进行绑定的搭建基于群晖配置还是和上面的流程一样搜索选择第一个安装这里的话储存空间设置里加上挂载的目录以便后续修改操作网络这里的话改成模式然后部署即可将绑定到登录这里的话我就不细讲了端口后跳转注册页面地区正确填写即可点击右下脚的新增整合搜索之后点击可能会稍微等待一会直到出现这个页面输入你之前烧录到所配置的地址端口号不要改变之后输入你在上面在配置时保存的并点击确认出现成功提示后恭喜你已经成功将绑定此时就能正常的显示出它的温湿度信息啦使用管模块控制小灯实现无极调光当初本身我想做的是使用继电器控制小灯的开关后期做了之后我并没有感到满意晚上由于灯光不能调整感觉会比较刺眼准备材料你需要一个开关驱动模块一个带正负极线的小灯外加一个按钮模块用于控制小灯的开关这些小东西的话你都可以在淘宝上轻易的买到而且的话价格也不是很贵所需代码和那用你自己的你的名称你的密码模块使用调光控制连接到的栅极设置频率控制按钮开关温湿度传感器线路连接的与分别接入管模块的与接口使用电源供电分别接入与小灯分别接入与按钮模块连接与分别接入的和处即可总结其实配置起来的话难度还好不算太难只不过写文章的时候倒是感觉很手酸呜呜呜这样的话就又算做了一个记录希望帮助咱自己的同时也能帮助到你呀',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-11-26 12:18:10',
+  postMainColor: '#e3cdcc',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="icon" href="/img/skira.ico"><img style="display:none" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src=" " onerror='this.onerror=null;var currentDomain="zhangge." + "net"; var str1=currentDomain; str2="docu"+"ment.loca"+"tion.host"; str3=eval(str2) ;if( str1!=str3 ){ do_action = "loca" + "tion." + "href = loca" + "tion.href" + ".rep" + "lace(docu" +"ment"+".loca"+"tion.ho"+"st," + "currentDomain" + ")";eval(do_action) }' /><meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/feed.xml" title="桜紺狸の部落阁" type="application/atom+xml">
+</head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://www.skira.top/img/lemonsuka.webp"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" href="https://www.skira.top" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://www.skira.top/img/lemonsuka.webp" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://pan.lemonbuluo.eu.org" title="桜紺狸云盘站"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://www.skira.top/img/lemonsuka.webp" alt="桜紺狸云盘站"/><span class="back-menu-item-text">桜紺狸云盘站</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">桜紺狸の部落阁</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 友人帐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/fcircle/"><i class="anzhiyufont anzhiyu-icon-artstation faa-tada" style="font-size: 0.9em;"></i><span> 朋友圈</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://www.travellings.cn/go.html"><i class="fa-solid fa-train-subway faa-tada"></i><span> 开往</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/?id=7299875022&amp;server=netease"><i class="anzhiyufont anzhiyu-icon-music faa-tada" style="font-size: 0.9em;"></i><span> 音乐库</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/lemonsuka-bilibili/"><i class="anzhiyufont anzhiyu-icon-bilibili faa-tada" style="font-size: 0.9em;"></i><span> 追番页</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://jq.qq.com/?_wv=1027&amp;k=GrqxwNCU"><i class="anzhiyufont anzhiyu-icon-qq faa-tada" style="font-size: 0.9em;"></i><span> 加入桜紺狸の群聊</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/comments/"><i class="anzhiyufont anzhiyu-icon-envelope faa-tada" style="font-size: 0.9em;"></i><span> 留言板</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/archives/df6ae50d/"><i class="fas fa-edit faa-tada"></i><span> 桜紺狸の日记</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/essay/"><i class="anzhiyufont anzhiyu-icon-lightbulb faa-tada" style="font-size: 0.9em;"></i><span> 闲言碎语</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/update/"><i class="fa-solid fa-clock-rotate-left faa-tada"></i><span> 本站更新日志</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button only-home" id="travellings_button" title="随机前往一个开往项目网站"><a class="site-page" onclick="anzhiyu.totraveling()" title="随机前往一个开往项目网站" href="javascript:void(0);" rel="external nofollow" data-pjax-state="external"><i class="anzhiyufont anzhiyu-icon-train"></i></a></div><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://www.skira.top/img/wx.webp" target="_blank"><img class="post-qr-code-img" alt="微信" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://www.skira.top/img/wx.webp"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://www.skira.top/img/zfb.webp" target="_blank"><img class="post-qr-code-img" alt="支付宝" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://www.skira.top/img/zfb.webp"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">音乐</div><span class="author-content-item-title">灵魂的碰撞💥</span></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span><a class="card-more-btn" href="/archives/" title="查看更多">
+    <i class="anzhiyufont anzhiyu-icon-angle-right"></i></a></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/10/"><span class="card-archive-list-date">十月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/07/"><span class="card-archive-list-date">七月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2023/09/"><span class="card-archive-list-date">九月 2023</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2023/08/"><span class="card-archive-list-date">八月 2023</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2023/07/"><span class="card-archive-list-date">七月 2023</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2022/12/"><span class="card-archive-list-date">十二月 2022</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2022/08/"><span class="card-archive-list-date">八月 2022</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">1</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item on" id="consoleCommentBarrage" onclick="anzhiyu.switchCommentBarrage()" title="热评开关"><a class="commentBarrage"><i class="anzhiyufont anzhiyu-icon-message"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%A1%9C%E7%B4%BA%E7%8B%B8%E3%81%AE%E6%8A%98%E8%85%BE%E8%AE%B0%E5%BD%95/" itemprop="url">桜紺狸の折腾记录</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/%E6%A1%9C%E7%B4%BA%E7%8B%B8%E3%81%AE%E7%B2%BE%E9%80%89%E8%AE%B0%E5%BD%95%E9%9B%86/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>桜紺狸の精选记录集</span></a><a class="article-meta__tags" href="/tags/esp8266/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>esp8266</span></a><a class="article-meta__tags" href="/tags/%E5%8D%95%E7%89%87%E6%9C%BA/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>单片机</span></a></span></div></div><h1 class="post-title" itemprop="name headline">esp8266 接入homeassistant的实践</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2024-10-04T20:11:06.873Z" title="发表于 2024-10-05 04:11:06">2024-10-05</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2024-11-26T04:18:10.250Z" title="更新于 2024-11-26 12:18:10">2024-11-26</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="esp8266 接入homeassistant的实践"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为黑龙江"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>黑龙江</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src="https://pic.skira.top/Skirafile/20241005.webp"></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="https://www.skira.top/archives/6a16f043/"><header><a class="post-meta-categories" href="/categories/%E6%A1%9C%E7%B4%BA%E7%8B%B8%E3%81%AE%E6%8A%98%E8%85%BE%E8%AE%B0%E5%BD%95/" itemprop="url">桜紺狸の折腾记录</a><a href="/tags/%E6%A1%9C%E7%B4%BA%E7%8B%B8%E3%81%AE%E7%B2%BE%E9%80%89%E8%AE%B0%E5%BD%95%E9%9B%86/" tabindex="-1" itemprop="url">桜紺狸の精选记录集</a><a href="/tags/esp8266/" tabindex="-1" itemprop="url">esp8266</a><a href="/tags/%E5%8D%95%E7%89%87%E6%9C%BA/" tabindex="-1" itemprop="url">单片机</a><h1 id="CrawlerTitle" itemprop="name headline">esp8266 接入homeassistant的实践</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">桜紺狸</span><time itemprop="dateCreated datePublished" datetime="2024-10-04T20:11:06.873Z" title="发表于 2024-10-05 04:11:06">2024-10-05</time><time itemprop="dateCreated datePublished" datetime="2024-11-26T04:18:10.250Z" title="更新于 2024-11-26 12:18:10">2024-11-26</time></header><h1 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h1><p>由于柠萌最近淘宝手里有很多小券就打算想找个便宜又好玩的东西玩。正好b站最近总是给咱推esp8266系列以及单片机的视频。手就很刺挠了，入了一块玩玩，就有了今天的教程记录了。</p>
+<h1 id="1-esp8266-配合homeassistant实现温湿度实时显示（保姆级教程）"><a href="#1-esp8266-配合homeassistant实现温湿度实时显示（保姆级教程）" class="headerlink" title="1.esp8266 配合homeassistant实现温湿度实时显示（保姆级教程）"></a>1.esp8266 配合homeassistant实现温湿度实时显示（保姆级教程）</h1><h2 id="esphome的搭建（基于群晖7-2docker配置）"><a href="#esphome的搭建（基于群晖7-2docker配置）" class="headerlink" title="esphome的搭建（基于群晖7.2docker配置）"></a>esphome的搭建（基于群晖7.2docker配置）</h2><p>container manager打开后点击<strong>注册表</strong></p>
+<div class="note default simple"><p>这里的话由于docker在国内被墙，需要科学上网。</p>
+</div>
+
+<p>输入esphome,下载最新版本即可</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-5640.webp" alt="clipboard-5640.webp"></p>
+<p>在端口这里本地端口6052就行，变量这里<strong>USERNAME</strong> <strong>PASSWORD</strong> 内务必填写好你的用户名和密码即可部署完毕</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-2739.webp" alt="clipboard-2739.webp"></p>
+<p>你的机器内网ip+6052端口号输入即可进入，esphome的webui界面，用户名和密码填你在docker的配置的即可。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-6109.webp" alt="clipboard-6109.webp"></p>
+<div class="note default simple"><p>首次进入的话不会有左上角的esp8266的一个栏，是空白的状态</p>
+</div>
+
+<p>点击右下角的绿色标识 <strong>newdevice</strong> 后弹出下面如图的弹窗点击<strong>CONTINUE</strong></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-1548.webp" alt="clipboard-1548.webp"></p>
+<p>在这里的话是输入配置文件的名称，可以随便输入，柠萌这里的话就默认填esp8266好了</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-9178.webp" alt="clipboard-1548.webp"></p>
+<p>输入完毕后会弹出设备选项，选<strong>esp8266</strong></p>
+<p>弹出这个话就是配置好了，</p>
+<div class="note default simple"><p>底下会显示一串key的密钥，请务必保存好</p>
+</div>
+
+<p>之后点击INSTALL即可</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-3042.webp" alt="clipboard-3042.webp"></p>
+<p>点击CANCEL 接下来我们来配置一下yaml文件</p>
+<p>点击EDIT,这里是默认所给出的配置文件，我们需要改一下内容</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-2499.webp" alt="clipboard-2499.webp"></p>
+<p>这里的话有必要讲解一下内容，</p>
+<div class="note default simple"><p>前面这些<strong>api</strong>，<strong>ota</strong> ，<strong>ap</strong>这些数值都不要动，按照默认的来，按需加入内容</p>
+</div>
+
+<p>WiFi这里填你自己的WiFi名称和密码， <strong>manual_ip:</strong> 这里填写固定的ip地址以及路由器的ip地址， <strong>sensor:</strong> 这里 <strong>pin</strong> 写自己所与杜邦线连接的gpio引脚</p>
+<blockquote>
+<p>我这里的话是这样 oata 接在esp8266的随便一个gpio引脚都可以，只需在配置文件里改正即可。</p>
+</blockquote>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/esp8266dht11.webp" alt="esp8266dht11.webp"></p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">esphome:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">esp8266</span></span><br><span class="line">  <span class="attr">friendly_name:</span> <span class="string">esp8266</span></span><br><span class="line"></span><br><span class="line"><span class="attr">esp8266:</span></span><br><span class="line">  <span class="attr">board:</span> <span class="string">esp01_1m</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Enable logging</span></span><br><span class="line"><span class="attr">logger:</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Enable Home Assistant API</span></span><br><span class="line"><span class="attr">api:</span></span><br><span class="line">  <span class="attr">encryption:</span></span><br><span class="line">    <span class="attr">key:</span> <span class="string">&quot;gBZDX9+lyYluiJtupESyRKghj+RHK1dUBSzPIcvQDd4=&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ota:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">esphome</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">&quot;94cc3828b9966c4ab5ccbc4b005ec1&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">wifi:</span></span><br><span class="line">  <span class="attr">ssid:</span> <span class="string">&quot;你的WiFi名称&quot;</span></span><br><span class="line">  <span class="attr">password:</span> <span class="string">&quot;你的WiFi密码&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Enable fallback hotspot (captive portal) in case wifi connection fails</span></span><br><span class="line">  <span class="attr">ap:</span></span><br><span class="line">    <span class="attr">ssid:</span> <span class="string">&quot;Esp8266 Fallback Hotspot&quot;</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">&quot;VAI3mbrjBXlk&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">manual_ip:</span>                <span class="comment">#设置固定IP</span></span><br><span class="line">    <span class="attr">static_ip:</span> <span class="number">192.168</span><span class="number">.123</span><span class="number">.185</span></span><br><span class="line">    <span class="attr">gateway:</span> <span class="number">192.168</span><span class="number">.123</span><span class="number">.1</span></span><br><span class="line">    <span class="attr">subnet:</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">captive_portal:</span></span><br><span class="line"></span><br><span class="line"><span class="attr">web_server:</span>  <span class="comment">## web控制，添加了这2行，就可以在网页端打开设备ip;</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line"></span><br><span class="line"><span class="attr">sensor:</span>                      <span class="comment">#设置dht11传感器</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">dht</span></span><br><span class="line">    <span class="attr">pin:</span> <span class="string">GPIO4</span></span><br><span class="line">    <span class="attr">temperature:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">&quot;Temperature&quot;</span></span><br><span class="line">    <span class="attr">humidity:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">&quot;Humidity&quot;</span></span><br><span class="line">    <span class="attr">update_interval:</span> <span class="string">30s</span>    <span class="comment"># 数据每30s监测一次</span></span><br><span class="line">    <span class="attr">model:</span> <span class="string">&quot;DHT11&quot;</span></span><br><span class="line"></span><br><span class="line">  </span><br></pre></td></tr></table></figure>
+
+<p>点击save保存</p>
+<p>点击INSTALL选项，这里的话柠萌就展示第二种安装方法</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-8937.webp" alt="clipboard-8937.webp"></p>
+<p>在这个步骤里可能等待的时间过于漫长，但还是请耐心等待，直到显示出 <strong>Download project</strong> 后点击下载所要烧录的文件</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-1668.webp" alt="clipboard-1668.webp"></p>
+<p>下载完毕后点击  <strong>Open ESPHome Web</strong>，跳转页面</p>
+<p>此时将你的esp8266 连接上电脑的usb口</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-0184.webp" alt="clipboard-0184.webp"></p>
+<p>此时勾选esp8266的端口，</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-0207.webp" alt="clipboard-0207.webp"></p>
+<p>点击INSTALL将刚刚下载的bin文件导入，即可开始烧录，等待进度条跑完。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-7650.webp" alt="clipboard-7650.webp"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-7328.webp" alt="clipboard-7328.webp"></p>
+<p>此时就可以输入你在配置文件所填写的ip地址即可进入到烧录在esp8266的webui界面</p>
+<p>此时如果能正常显示温湿度，那么在基于esphome上的配置就已经完毕了</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-9755.webp" alt="clipboard-9755.webp"></p>
+<h2 id="与homeassistant进行绑定"><a href="#与homeassistant进行绑定" class="headerlink" title="与homeassistant进行绑定"></a>与homeassistant进行绑定</h2><h3 id="homeassistant的搭建（基于群晖7-2docker配置）"><a href="#homeassistant的搭建（基于群晖7-2docker配置）" class="headerlink" title="homeassistant的搭建（基于群晖7.2docker配置）"></a>homeassistant的搭建（基于群晖7.2docker配置）</h3><p>还是和上面的流程一样，搜索选择第一个安装</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-3167.webp" alt="clipboard-9755.webp"></p>
+<p>这里的话储存空间设置里加上挂载&#x2F;config的目录，以便后续修改操作</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-8658.webp" alt="clipboard-8658.webp"></p>
+<p>网络这里的话改成host模式，然后部署即可</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-2995.webp" alt="clipboard-2995.webp"></p>
+<h3 id="将esphome绑定到homeassistant"><a href="#将esphome绑定到homeassistant" class="headerlink" title="将esphome绑定到homeassistant"></a>将esphome绑定到homeassistant</h3><blockquote>
+<p>登录这里的话我就不细讲了，IP+8123端口后跳转注册页面，地区正确填写即可</p>
+</blockquote>
+<p>点击右下脚的新增整合</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-9443.webp" alt="clipboard-9443.webp"></p>
+<p>搜索esphome，之后点击可能会稍微等待一会，直到出现这个页面</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-8952.webp" alt="clipboard-8952.webp"></p>
+<p>输入你之前烧录到esp8266所配置的ip地址 <strong>端口号不要改变</strong></p>
+<p>之后输入你在上面在esphome配置时保存的key并点击确认，出现成功提示后恭喜你已经成功将esphome绑定。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-9802.webp" alt="clipboard-9802.webp"></p>
+<p>此时就能正常的显示出它的温湿度信息啦</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-2440.webp" alt="clipboard-2440.webp"></p>
+<h1 id="2-esp8266使用mos管模块控制小灯实现pwm无极调光"><a href="#2-esp8266使用mos管模块控制小灯实现pwm无极调光" class="headerlink" title="2.esp8266使用mos管模块控制小灯实现pwm无极调光"></a>2.esp8266使用mos管模块控制小灯实现pwm无极调光</h1><blockquote>
+<p>当初本身我想做的是使用继电器控制小灯的开关，后期做了之后我并没有感到满意，晚上由于灯光不能调整，感觉会比较刺眼。</p>
+</blockquote>
+<h2 id="准备材料"><a href="#准备材料" class="headerlink" title="准备材料"></a>准备材料</h2><p>你需要一个<strong>mos开关驱动模块</strong>，一个带<strong>正负极线的小灯</strong>外加一个 <strong>按钮模块</strong>用于控制小灯的开关</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/Screenshot_20241126-202145_%E6%B7%98%E5%AE%9D.webp" alt="Screenshot_20241126-202145_淘宝.webp"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-8170.webp" alt="clipboard-8170.webp"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-4560.webp" alt="clipboard-4560.webp"></p>
+<p>这些小东西的话你都可以在淘宝上轻易的买到，而且的话价格也不是很贵</p>
+<h2 id="所需代码"><a href="#所需代码" class="headerlink" title="所需代码"></a>所需代码</h2><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">esphome:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">esp8266</span></span><br><span class="line">  <span class="attr">friendly_name:</span> <span class="string">esp8266</span></span><br><span class="line"></span><br><span class="line"><span class="attr">esp8266:</span></span><br><span class="line">  <span class="attr">board:</span> <span class="string">esp01_1m</span></span><br><span class="line"></span><br><span class="line"><span class="attr">logger:</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#api和ota那用你自己的</span></span><br><span class="line"></span><br><span class="line"><span class="attr">wifi:</span></span><br><span class="line">  <span class="attr">ssid:</span> <span class="string">&quot;你的WiFi名称&quot;</span></span><br><span class="line">  <span class="attr">password:</span> <span class="string">&quot;你的密码&quot;</span></span><br><span class="line">  <span class="attr">ap:</span></span><br><span class="line">    <span class="attr">ssid:</span> <span class="string">&quot;Esp8266 Fallback Hotspot&quot;</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">&quot;5IUTqpzb6Nj1&quot;</span></span><br><span class="line">  <span class="attr">manual_ip:</span></span><br><span class="line">    <span class="attr">static_ip:</span> <span class="number">192.168</span><span class="number">.123</span><span class="number">.185</span></span><br><span class="line">    <span class="attr">gateway:</span> <span class="number">192.168</span><span class="number">.123</span><span class="number">.1</span></span><br><span class="line">    <span class="attr">subnet:</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">captive_portal:</span></span><br><span class="line"></span><br><span class="line"><span class="attr">web_server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">output:</span>   <span class="comment">#mos模块使用pwm调光控制</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">esp8266_pwm</span></span><br><span class="line">    <span class="attr">pin:</span> <span class="string">GPIO13</span>       <span class="comment"># 连接到MOSFET的栅极</span></span><br><span class="line">    <span class="attr">id:</span> <span class="string">pwm_output</span></span><br><span class="line">    <span class="attr">frequency:</span> <span class="number">3000 </span><span class="string">Hz</span> <span class="comment"># 设置PWM频率</span></span><br><span class="line"></span><br><span class="line"><span class="attr">light:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">monochromatic</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">&quot;Dimmer Light&quot;</span></span><br><span class="line">    <span class="attr">output:</span> <span class="string">pwm_output</span></span><br><span class="line">    <span class="attr">id:</span> <span class="string">dimmer_light</span></span><br><span class="line">    <span class="attr">default_transition_length:</span> <span class="string">0s</span></span><br><span class="line"><span class="attr">binary_sensor:</span>   <span class="comment">#控制按钮开关</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">gpio</span></span><br><span class="line">    <span class="attr">pin:</span></span><br><span class="line">      <span class="attr">number:</span> <span class="string">GPIO14</span></span><br><span class="line">      <span class="attr">mode:</span> <span class="string">INPUT_PULLUP</span></span><br><span class="line">      <span class="attr">inverted:</span> <span class="literal">True</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">&quot;Button&quot;</span></span><br><span class="line">    <span class="attr">on_press:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">light.toggle:</span> <span class="string">dimmer_light</span></span><br><span class="line"><span class="attr">sensor:</span>  <span class="comment">#温湿度传感器</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">dht</span></span><br><span class="line">    <span class="attr">pin:</span> <span class="string">GPIO5</span></span><br><span class="line">    <span class="attr">temperature:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">&quot;Temperature&quot;</span></span><br><span class="line">    <span class="attr">humidity:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">&quot;Humidity&quot;</span></span><br><span class="line">    <span class="attr">update_interval:</span> <span class="string">60s</span></span><br><span class="line">    <span class="attr">model:</span> <span class="string">&quot;DHT11&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="线路连接"><a href="#线路连接" class="headerlink" title="线路连接"></a>线路连接</h2><p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-9427.webp" alt="clipboard-9427.webp"></p>
+<p>esp8266的 GPIO13与gnd分别接入mos管模块的pwm与gnd接口，使用5v电源供电分别接入vin+与vin- 。小灯分别接入vout+与vout- 。</p>
+<p>按钮模块连接：out与gnd，vcc分别接入esp8266的gpio14和gnd，3.3v处即可。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实配置起来的话难度还好，不算太难，只不过写文章的时候倒是感觉很手酸呜呜呜，这样的话就又算做了一个记录，希望帮助咱自己的同时也能帮助到你呀。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://www.skira.top/img/lemonsuka.webp" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://www.skira.top/img/lemonsuka.webp" title="头像" alt="头像"></a><div class="post-copyright__author_name">桜紺狸</div><div class="post-copyright__author_desc">一个闲聊萌新的技术动漫交流小窝</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="https://www.skira.top/archives/6a16f043/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('https://www.skira.top/archives/6a16f043/')">esp8266 接入homeassistant的实践</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"><div class="post-reward" onclick="anzhiyu.addRewardMask()"><div class="reward-button button--animated" title="赞赏作者"><i class="anzhiyufont anzhiyu-icon-hand-heart-fill"></i>打赏作者</div><div class="reward-main"><div class="reward-all"><span class="reward-title">感谢你赐予我前进的力量</span><ul class="reward-group"><li class="reward-item"><a href="https://www.skira.top/img/wx.webp" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://www.skira.top/img/wx.webp" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://www.skira.top/img/zfb.webp" target="_blank"><img class="post-qr-code-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://www.skira.top/img/zfb.webp" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul><a class="reward-main-btn" href="/about/#about-reward" target="_blank"><div class="reward-text">赞赏者名单</div><div class="reward-dec">因为你们的支持让我意识到写文章的价值🙏</div></a></div></div></div><div id="quit-box" onclick="anzhiyu.removeRewardMask()" style="display: none"></div></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="https://www.skira.top/archives/6a16f043/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=esp8266 接入homeassistant的实践&amp;url=https://www.skira.top/archives/6a16f043/&amp;pic=https://pic.skira.top/Skirafile/20241005.webp" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.skira.top" target="_blank">桜紺狸の部落阁</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/%E6%A1%9C%E7%B4%BA%E7%8B%B8%E3%81%AE%E7%B2%BE%E9%80%89%E8%AE%B0%E5%BD%95%E9%9B%86/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>桜紺狸の精选记录集<span class="tagsPageCount">5</span></a><a class="post-meta__box__tags" href="/tags/esp8266/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>esp8266<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E5%8D%95%E7%89%87%E6%9C%BA/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>单片机<span class="tagsPageCount">1</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://pic.skira.top/Skirafile/clipboard-1748.webp" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/archives/1d8d801b/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/114736187_p0.webp" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">在群晖上部署nastool全过程 by桜紺狸</div></div></a></div><div class="next-post pull-right"><a href="/archives/98594d23/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-1748.webp" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">NAS与PT/BT下载的网络环境最优解决方案</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/archives/5607dff5/" title="Nginx proxy manager 配置笔记 by桜紺狸"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/115237913_p0.webp" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2022-12-26</div><div class="title">Nginx proxy manager 配置笔记 by桜紺狸</div></div></a></div><div><a href="/archives/25263640/" title="桜紺狸のNPM配置记录测试"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://ik.imagekit.io/skira/skirablog/20230730182342/10011.webp?updatedAt=1690712671435" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2022-07-07</div><div class="title">桜紺狸のNPM配置记录测试</div></div></a></div><div><a href="/archives/f66e1c0f/" title="twkioo使用vercel部署全过程"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/115237913_p1.webp" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2023-09-01</div><div class="title">twkioo使用vercel部署全过程</div></div></a></div><div><a href="/archives/98594d23/" title="NAS与PT&#x2F;BT下载的网络环境最优解决方案"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-1748.webp" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2025-01-10</div><div class="title">NAS与PT&#x2F;BT下载的网络环境最优解决方案</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div><div class="comment-tips" id="comment-tips"><span>✅ 你无需删除空行，直接评论以获取最佳展示效果</span></div></div><div class="comment-wrap"><div><div id="twikoo-wrap"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://www.skira.top/img/lemonsuka.webp" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__description"><div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">本站主要以<b style="color:#fff">桜紺狸の笔记记录</b>发表对自己的问题和看法，以及<b style="color:#fff">对实用教程</b><b style="color:#fff">进行记录</b>。</div><div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">如果你能在本站收获到<b style="color:#fff">知识</b>和<b style="color:#fff">教程</b>桜紺狸会为你开心😊</div></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/about"><h1 class="author-info__name">桜紺狸</h1><div class="author-info__desc">一个闲聊萌新的技术动漫交流小窝</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://www.skira.top" target="_blank" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a><a class="social-icon faa-parent animated-hover" href="https://www.skira.top/feed.xml" target="_blank" title="RSS"><i class="anzhiyufont anzhiyu-icon-rss"></i></a><a class="social-icon faa-parent animated-hover" href="https://space.bilibili.com/107622403" target="_blank" title="BiliBili"><i class="anzhiyufont anzhiyu-icon-bilibili"></i></a><a class="social-icon faa-parent animated-hover" href="https://jq.qq.com/?_wv=1027&amp;k=GrqxwNCU" target="_blank" title="QQ"><i class="anzhiyufont anzhiyu-icon-qq"></i></a></div></div></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bullhorn anzhiyu-shake"></i><span>公告</span></div><div class="announcement_content">本站域名变更，请收藏新站点skira.top,欢迎友链鸭</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B"><span class="toc-number">1.</span> <span class="toc-text">开始</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-esp8266-%E9%85%8D%E5%90%88homeassistant%E5%AE%9E%E7%8E%B0%E6%B8%A9%E6%B9%BF%E5%BA%A6%E5%AE%9E%E6%97%B6%E6%98%BE%E7%A4%BA%EF%BC%88%E4%BF%9D%E5%A7%86%E7%BA%A7%E6%95%99%E7%A8%8B%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">1.esp8266 配合homeassistant实现温湿度实时显示（保姆级教程）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#esphome%E7%9A%84%E6%90%AD%E5%BB%BA%EF%BC%88%E5%9F%BA%E4%BA%8E%E7%BE%A4%E6%99%967-2docker%E9%85%8D%E7%BD%AE%EF%BC%89"><span class="toc-number">2.1.</span> <span class="toc-text">esphome的搭建（基于群晖7.2docker配置）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8Ehomeassistant%E8%BF%9B%E8%A1%8C%E7%BB%91%E5%AE%9A"><span class="toc-number">2.2.</span> <span class="toc-text">与homeassistant进行绑定</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#homeassistant%E7%9A%84%E6%90%AD%E5%BB%BA%EF%BC%88%E5%9F%BA%E4%BA%8E%E7%BE%A4%E6%99%967-2docker%E9%85%8D%E7%BD%AE%EF%BC%89"><span class="toc-number">2.2.1.</span> <span class="toc-text">homeassistant的搭建（基于群晖7.2docker配置）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%86esphome%E7%BB%91%E5%AE%9A%E5%88%B0homeassistant"><span class="toc-number">2.2.2.</span> <span class="toc-text">将esphome绑定到homeassistant</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-esp8266%E4%BD%BF%E7%94%A8mos%E7%AE%A1%E6%A8%A1%E5%9D%97%E6%8E%A7%E5%88%B6%E5%B0%8F%E7%81%AF%E5%AE%9E%E7%8E%B0pwm%E6%97%A0%E6%9E%81%E8%B0%83%E5%85%89"><span class="toc-number">3.</span> <span class="toc-text">2.esp8266使用mos管模块控制小灯实现pwm无极调光</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E6%9D%90%E6%96%99"><span class="toc-number">3.1.</span> <span class="toc-text">准备材料</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%80%E9%9C%80%E4%BB%A3%E7%A0%81"><span class="toc-number">3.2.</span> <span class="toc-text">所需代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BA%BF%E8%B7%AF%E8%BF%9E%E6%8E%A5"><span class="toc-number">3.3.</span> <span class="toc-text">线路连接</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">3.4.</span> <span class="toc-text">总结</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/archives/98594d23/" title="NAS与PT/BT下载的网络环境最优解决方案"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/clipboard-1748.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="NAS与PT/BT下载的网络环境最优解决方案"/></a><div class="content"><a class="title" href="/archives/98594d23/" title="NAS与PT/BT下载的网络环境最优解决方案">NAS与PT/BT下载的网络环境最优解决方案</a><time datetime="2025-01-09T17:31:30.012Z" title="发表于 2025-01-10 01:31:30">2025-01-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/archives/6a16f043/" title="esp8266 接入homeassistant的实践"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/20241005.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="esp8266 接入homeassistant的实践"/></a><div class="content"><a class="title" href="/archives/6a16f043/" title="esp8266 接入homeassistant的实践">esp8266 接入homeassistant的实践</a><time datetime="2024-10-04T20:11:06.873Z" title="发表于 2024-10-05 04:11:06">2024-10-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/archives/1d8d801b/" title="在群晖上部署nastool全过程 by桜紺狸"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/114736187_p0.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="在群晖上部署nastool全过程 by桜紺狸"/></a><div class="content"><a class="title" href="/archives/1d8d801b/" title="在群晖上部署nastool全过程 by桜紺狸">在群晖上部署nastool全过程 by桜紺狸</a><time datetime="2024-07-01T21:44:11.002Z" title="发表于 2024-07-02 05:44:11">2024-07-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/archives/f66e1c0f/" title="twkioo使用vercel部署全过程"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://pic.skira.top/Skirafile/115237913_p1.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="twkioo使用vercel部署全过程"/></a><div class="content"><a class="title" href="/archives/f66e1c0f/" title="twkioo使用vercel部署全过程">twkioo使用vercel部署全过程</a><time datetime="2023-09-01T00:49:55.118Z" title="发表于 2023-09-01 08:49:55">2023-09-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/archives/8186ed29/" title="屏蔽群晖系统升级并去除群晖桌面小红点配置"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://ik.imagekit.io/skira/skirablog/nasupdatefix/01.webp?updatedAt=1691327430231" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="屏蔽群晖系统升级并去除群晖桌面小红点配置"/></a><div class="content"><a class="title" href="/archives/8186ed29/" title="屏蔽群晖系统升级并去除群晖桌面小红点配置">屏蔽群晖系统升级并去除群晖桌面小红点配置</a><time datetime="2023-08-06T04:06:19.000Z" title="发表于 2023-08-06 12:06:19">2023-08-06</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div id="footer_deal"><a class="deal_link" href="/lemonyds@163.com" title="email"><i class="anzhiyufont anzhiyufont anzhiyu-icon-envelope"></i></a><img class="footer_mini_logo" title="返回顶部" alt="返回顶部" onclick="anzhiyu.scrollToDest(0, 500)" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://www.skira.top/img/lemonsuka.webp" size="50px"/><a class="deal_link" target="_blank" rel="noopener" href="https://space.bilibili.com/107622403" title="Bilibili"><i class="anzhiyufont anzhiyufont anzhiyu-icon-bilibili"></i></a></div><div class="copyright">&copy;2020 - 2025 By 桜紺狸</div><div id="anzhiyu-footer"><div class="footer-group"><div class="footer-title">服务</div><div class="footer-links"><a class="footer-item" title="51la统计" target="_blank" rel="noopener" href="https://v6.51.la/">51la统计</a><a class="footer-item" title="十年之约" target="_blank" rel="noopener" href="https://www.foreverblog.cn/">十年之约</a><a class="footer-item" title="开往" target="_blank" rel="noopener" href="https://github.com/travellings-link/travellings">开往</a></div></div><div class="footer-group"><div class="footer-title">导航</div><div class="footer-links"><a class="footer-item" title="即刻短文" href="/essay/">即刻短文</a><a class="footer-item" title="友链文章" href="/fcircle/">友链文章</a><a class="footer-item" title="留言板" href="/comments/">留言板</a></div></div><div class="footer-group"><div class="footer-title">协议</div><div class="footer-links"><a class="footer-item" title="隐私协议" href="/privacy/">隐私协议</a><a class="footer-item" title="Cookies" href="/cookies/">Cookies</a><a class="footer-item" title="版权协议" href="/copyright/">版权协议</a></div></div><div class="footer-group"><div class="footer-title-group"><div class="footer-title">友链</div><a class="random-friends-btn" id="footer-random-friends-btn" href="javascript:addFriendLinksInFooter();" title="换一批友情链接"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right"></i></a></div><div class="footer-links" id="friend-links-in-footer"></div></div></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://pan.lemonbuluo.eu.org" style="margin-inline:5px" data-title="网盘服务来自本站桜紺狸云提供支持" title="网盘服务来自本站桜紺狸云提供支持"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://img.shields.io/badge/桜紺狸云-Lemoncloud-9cf?style=flat&amp;logo=Google Cloud" alt="网盘服务来自本站桜紺狸云提供支持"/></a><a class="github-badge" target="_blank" href="https://icp.gov.moe/?keyword=20228635" style="margin-inline:5px" data-title="由萌ICP为本站提供登记号" title="由萌ICP为本站提供登记号"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://img.shields.io/badge/%E8%90%8CICP%E5%A4%87-20228635-fe1384?style-flat&amp;logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAABS2lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDIgNzkuMTYwOTI0LCAyMDE3LzA3LzEzLTAxOjA2OjM5ICAgICAgICAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIi8+CiA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSJyIj8+nhxg7wAAByxJREFUSInl1nlwVeUZx/HPuTckkD0kQFiCEEIUlNUCAqKoSBV1AIt1ikpVLFbLONjWGUXbmWrbweJMy7hUxbbTjsUq6KCiWEvr0kE2WVK2QCKBJCxJgEASsienfxwqMob+3Zm+f93z3vM+32f5vc9z+H9bwVcfOp/YQ+1prhhEZS1VDQzqQ1MjiQmIC5Liwm3lBWpqFimrulb/7A/067vM2IsOBZ2h8MhJQW6KMDNVsKeaizKEyUlsKueqgWJ39AMJF3QpDCNYr1SaEig/lWNX2Z1h6dH5/lVyGdVIZFf7MHo9bEfh9rCg/+8NyHlN77QTsnpQ0i2y08VK+BosfhbW0cHxqmSfFd9qW+l9Pi+5WltFdGTsOBbO5dJcdh3lN5+xff0Y2zuelXjRsyYUrjOu4BVJaavlpbWIJRBLOM+J81O95AAnTtM9vNHGknut3zdT48FutJE3koWTuG4oSXH+VsInX3B9IdcVUNfCuv08t4GjO6NspOa3BNcOXx1eOugVHQnrTMkTuyWrC/BjRZO9uPYTpw7HhTWkXcLd45l9GblpHD7NWzt5ZTMXZ/OdkTy+lvR07rmcmWffq6pn9W5e/oymfcT6kJbXHiydMyVYkL/x66n+ZMcctQfjhgxl6UIGZ3Ooltd2RIZqjqKRS0ew9cFIA1cO5urlLHuPZWsZPJiZw7gqn0VT2HCIR9+jvCQhfHPrLGyE2Hng2roBxHnmJoZnc9drbD3I6QaaWkjpSVoeu4+x5XB05qMDqCenHz37UHmcFRv54ZuMeoYrB/L0DPRgZ0WfrsXVKzPX3nYykrn3dUZl8+Q0Qox/gc/L6ZlKzxQefo+UROpa6Z4VCedkPd8YyJYHI3u5T/HAShZNQxsXZfR3pCtwRW066VEeOuIUVUf77+9jTw2pycTOJml7Je1t9EgiI5X2jkgyze1fCSSdtjhBiJCkpKyuI+5oTdAtkTCgVwrbKsl8ko6QjO40tZ67EpkpdIbRf20dkbPpPTjdwsSX6I5dJYy4hoQAaZQdDy4A1iEMI613T6LtBPXJpPakrjGqc1Y6CTFq62htJp5KRwPJKWSkU3WKiiPEEqO6xgM6oZmctJhDXYH7Z59xuCyKpK6R26ZE+ys3MWYoN1/Mc5uoqmbEQJ6fTc/ulJ3i/lUc+YIfzeKhKzjVHN31A3XRHddKSrf6/6DOV3VTcw1hVKfkxOhaPDAe1UwfwmNTqT1Drxw+nE9xNXetIjHG2vnoxoT+rNrN2Of58Rp6JZ+ldKes5kjX4G7dKuikpoERfaltYnQ/DOSS3hEAFk9lXQkLnmf7Ib65lPJT3HU1+46Tm8rYvgzKYVA2h+vQIMjvewHwdSN20MiOSmZczO4a1hSzYi77T7CiiPF5JMTZexjJ5OagkwNV9M+MnJ09nKU3smgyQ3PYWoEO4fUjii4QceJmevJuMeP6csUAln4atcbSGoqOUpjD30uZNwnpHNtN3lC+NZa1xeT34pGVTJ3PL9+Ohs6GQ8gVtHZs6VLVwZhBReGwoXvt3THM/hP0SWVnCR8f4PMjkffjB/DQS8waxpHFfFgaaeHZDRRtJn0yP5tF31ymFVJ2nN27GD66KBzca2/XEWdkUpD3Fmd4tYj0FMS54Q9UnuaDUv6yE/24ewWP/DU6N/d1fvousYEs28DyLVEvGDOAt/egmSkXv2VYn3NBfpXbua6J8hMFFvy2RHsL+57gmX+w/AN651PfEDWQzLRI+afqIqOxFDJT6Rbn9Bmad3PnTH5wIxOXkJTWGiz57hCDsyqDWVldRNzeyOh+paaPfpFKnvqQX88iZwDVx0lLJqUHbe3EkZ1Odm+yUqK2GHYKmhvIG8fyeTz9IY5x67jnFPapdPDkl6jzwEF9IDjZJlgwfbG+o2u8+g4rd7D/UYI41TXnevV5K4j2q6uESckUP8rvNrH6fUH/sRXB9AlPONMSDZ8uazwoi56JjEyvdftV88jinhf4uIzmJRQOoOYgja0RKAiIBZxpjvZH5tP0c97axcLlyBXOuWZemJTYFFbUCU+1dl3j8PGSyFhnJ7EkYcWh7/njqpep5xfzWTyZZ7dEg73xOJKiGqf3YenNLBjLTz7i539COg/OvSOYO2GFo/VRG0Zwe0YX4Ns3R7NXSCxBeM8IthXfZvGf3xCWc/kkXvg2vVP4YB/rDzC1gGlDo+50/xvs2khKPrNnzAzmTH5HbzR0fkkKro93Ab5vx9kfaGgT3lLA5EyWbRpoTdHbSreOppGJV/PwlRTksK+aZz5l6z+RLBgxaau5k2cJelTKzmRQMq0d51J8UxL+23d1TDTcj7WQllZu4YwxDo+eZc22X9mwd6gN65GIFmQzampxcMOoR1xeuMbpVoqromsXdG3+wmCiekNtfSSmiUNWu2zgap+WjlZW8X11TeNkpWwICvNfCm8u3Cmxg4PN0VdmEJw7/7+0/g32RaqCbhRecAAAAABJRU5ErkJggg==" alt="由萌ICP为本站提供登记号"/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://img.shields.io/badge/Copyright-BY--NC--SA%204.0-d42328?style=flat&amp;logo=Claris" alt="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可"/></a><a class="github-badge" target="_blank" href="https://cloudflare-dns.com/" style="margin-inline:5px" data-title="本站使用cloudflare为静态资源提供全局CDN加速" title="本站使用cloudflare为静态资源提供全局CDN加速"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://img.shields.io/badge/CDN-Cloudflare-orange?style=flat&amp;logo=Cloudflare" alt="本站使用cloudflare为静态资源提供全局CDN加速"/></a><a class="github-badge" target="_blank" href="https://www.skira.top/" style="margin-inline:5px" data-title="本站部分静态功能以及其他服务部署于Vercel" title="本站部分静态功能以及其他服务部署于Vercel"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://img.shields.io/badge/Hosted-Vercel-brightgreen?style=flat&amp;logo=Vercel" alt="本站部分静态功能以及其他服务部署于Vercel"/></a></p></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">27</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">18</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">5</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" href="https://www.skira.top" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://www.skira.top/img/lemonsuka.webp" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://pan.lemonbuluo.eu.org" title="桜紺狸云盘站"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://www.skira.top/img/lemonsuka.webp" alt="桜紺狸云盘站"/><span class="back-menu-item-text">桜紺狸云盘站</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><i class="anzhiyufont anzhiyu-icon-link faa-tada" style="font-size: 0.9em;"></i><span> 友人帐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/fcircle/"><i class="anzhiyufont anzhiyu-icon-artstation faa-tada" style="font-size: 0.9em;"></i><span> 朋友圈</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://www.travellings.cn/go.html"><i class="fa-solid fa-train-subway faa-tada"></i><span> 开往</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/?id=7299875022&amp;server=netease"><i class="anzhiyufont anzhiyu-icon-music faa-tada" style="font-size: 0.9em;"></i><span> 音乐库</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/lemonsuka-bilibili/"><i class="anzhiyufont anzhiyu-icon-bilibili faa-tada" style="font-size: 0.9em;"></i><span> 追番页</span></a></li><li><a class="site-page child faa-parent animated-hover" target="_blank" rel="noopener" href="https://jq.qq.com/?_wv=1027&amp;k=GrqxwNCU"><i class="anzhiyufont anzhiyu-icon-qq faa-tada" style="font-size: 0.9em;"></i><span> 加入桜紺狸の群聊</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/comments/"><i class="anzhiyufont anzhiyu-icon-envelope faa-tada" style="font-size: 0.9em;"></i><span> 留言板</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/archives/df6ae50d/"><i class="fas fa-edit faa-tada"></i><span> 桜紺狸の日记</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/essay/"><i class="anzhiyufont anzhiyu-icon-lightbulb faa-tada" style="font-size: 0.9em;"></i><span> 闲言碎语</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><i class="anzhiyufont anzhiyu-icon-shoe-prints1 faa-tada" style="font-size: 0.9em;"></i><span> 随便逛逛</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/update/"><i class="fa-solid fa-clock-rotate-left faa-tada"></i><span> 本站更新日志</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/NAS/" style="font-size: 0.88rem;">NAS<sup>3</sup></a><a href="/tags/NPM/" style="font-size: 0.88rem;">NPM<sup>1</sup></a><a href="/tags/esp8266/" style="font-size: 0.88rem;">esp8266<sup>1</sup></a><a href="/tags/openwrt/" style="font-size: 0.88rem;">openwrt<sup>1</sup></a><a href="/tags/wearOS/" style="font-size: 0.88rem;">wearOS<sup>1</sup></a><a href="/tags/%E5%85%AC%E5%91%8A/" style="font-size: 0.88rem;">公告<sup>1</sup></a><a href="/tags/%E5%8A%A8%E6%BC%AB%E8%B5%84%E6%BA%90/" style="font-size: 0.88rem;">动漫资源<sup>1</sup></a><a href="/tags/%E5%8D%95%E7%89%87%E6%9C%BA/" style="font-size: 0.88rem;">单片机<sup>1</sup></a><a href="/tags/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/" style="font-size: 0.88rem;">博客搭建<sup>1</sup></a><a href="/tags/%E5%8D%9A%E5%AE%A2%E7%BB%B4%E6%8A%A4/" style="font-size: 0.88rem;">博客维护<sup>1</sup></a><a href="/tags/%E5%8E%9F%E5%88%9B/" style="font-size: 0.88rem;">原创<sup>1</sup></a><a href="/tags/%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90/" style="font-size: 0.88rem;">域名解析<sup>1</sup></a><a href="/tags/%E6%90%9E%E6%9C%BA%E6%8A%98%E8%85%BE/" style="font-size: 0.88rem;">搞机折腾<sup>6</sup></a><a href="/tags/%E6%A1%9C%E7%B4%BA%E7%8B%B8%E3%81%AE%E7%B2%BE%E9%80%89%E8%AE%B0%E5%BD%95%E9%9B%86/" style="font-size: 0.88rem;">桜紺狸の精选记录集<sup>5</sup></a><a href="/tags/%E7%A1%AC%E8%B7%AF%E7%94%B1/" style="font-size: 0.88rem;">硬路由<sup>1</sup></a><a href="/tags/%E7%BD%91%E7%AB%99%E9%83%A8%E7%BD%B2/" style="font-size: 0.88rem;">网站部署<sup>3</sup></a><a href="/tags/%E8%BD%AC%E8%BD%BD/" style="font-size: 0.88rem;">转载<sup>1</sup></a><a href="/tags/%E9%9A%8F%E8%BA%ABWiFi/" style="font-size: 0.88rem;">随身WiFi<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><a id="switch-commentBarrage" href="javascript:anzhiyu.switchCommentBarrage();" title="开关弹幕"><i class="anzhiyufont anzhiyu-icon-danmu"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="7299875022" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="is-center" id="loading-database"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-pulse-icon"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;/music/?id=7299875022&amp;server=netease&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script async src="/anzhiyu/random.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>(() => {
+  const init = () => {
+    twikoo.init(Object.assign({
+      el: '#twikoo-wrap',
+      envId: 'https://twikoo.skira.top/',
+      region: '',
+      onCommentLoaded: () => {
+        anzhiyu.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'))
+      }
+    }, null))
+  }
+
+  const loadTwikoo = () => {
+    if (typeof twikoo === 'object') setTimeout(runFn,0)
+    else getScript('https://cdn.cbd.int/twikoo@1.6.25/dist/twikoo.all.min.js').then(runFn)
+  }
+
+  const getCount = () => {
+    const countELement = document.getElementById('twikoo-count')
+    if(!countELement) return
+    twikoo.getCommentsCount({
+      envId: 'https://twikoo.skira.top/',
+      region: '',
+      urls: [window.location.pathname],
+      includeReply: false
+    }).then(res => {
+      countELement.textContent = res[0].count
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
+  const runFn = () => {
+    init();
+    
+  }
+
+  if ('Twikoo' === 'Twikoo' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('twikoo-wrap'), loadTwikoo)
+    else {
+      loadTwikoo()
+    }
+  } else {
+    window.loadOtherComment = loadTwikoo
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"><script async src="/js/anzhiyu/comment_barrage.js"></script></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getComment = () => {
+    const runTwikoo = () => {
+      twikoo.getRecentComments({
+        envId: 'https://twikoo.skira.top/',
+        region: '',
+        pageSize: 6,
+        includeReply: true
+      }).then(function (res) {
+        const twikooArray = res.map(e => {
+          return {
+            'content': changeContent(e.comment),
+            'avatar': e.avatar,
+            'nick': e.nick,
+            'url': e.url + '#' + e.id,
+            'date': new Date(e.created).toISOString()
+          }
+        })
+
+        saveToLocal.set('twikoo-newest-comments', JSON.stringify(twikooArray), 10/(60*24))
+        generateHtml(twikooArray)
+      }).catch(function (err) {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+    }
+
+    if (typeof twikoo === 'object') {
+      runTwikoo()
+    } else {
+      getScript('https://cdn.cbd.int/twikoo@1.6.25/dist/twikoo.all.min.js').then(runTwikoo)
+    }
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'><div class='name'><span>${array[i].nick} </span></div></a>`
+        }
+        
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('twikoo-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script async data-pjax src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.1/bubble/bubble.js"></script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><script async src="https://npm.elemecdn.com/lemonbuluo237-deploy@0.0.19/live2d-widget/autoload.js"></script><canvas class="fireworks" mobile="true"></canvas><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/dist/fireworks.min.js"></script><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = true;
+document.body.addEventListener('input', POWERMODE);
+</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","meta[property=\"og:type\"]","meta[property=\"og:site_name\"]","meta[property=\"og:description\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
