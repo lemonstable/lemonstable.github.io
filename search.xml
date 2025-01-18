@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+  
+    
+    <entry>
+      <title>NAS与PT/BT下载的网络环境最优解决方案</title>
+      <link href="/archives/98594d23/"/>
+      <url>/archives/98594d23/</url>
+      
+        <content type="html"><![CDATA[<h1 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h1><p>由于最近博主最近刚刚入坑pt下载，所以部署了个qBittorrent，用起来也倒是没什么问题，由于我的网络环境还不错，可以跑到一个比较理想的上传速度。</p><p>只不过有一个问题倒是深深困扰着我，原来使用的openwrt旁路由的网络环境可以直接代理给NAS上，但自从在NAS上部署了qBittorrent之后，我就只能通过排除nas ip方式这么去使用，但用了一段时间发现这个问题很糟糕，虽然qBittorrent不能走特殊流量了，但是NAS上的一些服务均受到了影响，比如docker  emby刮削 iptv还有一些其它服务都瘫痪了。</p><p>下面是小狸给出的解决方案</p><h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>由于我的主路由ip是192.168.123.1 旁路由是192.168.123.2 创建一个基于主路由的docker桥接，这样就可以很简单的绕过特殊网络环境而又不影响其它设备的使用啦。</p><h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><p>进入ssh终端，本教程我使用<strong>群晖系统</strong>进行演示</p><p>需要给与root权限,使用ip addr 查看网卡名称，博主的是ovs_eth0,就不直接展示了</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo -i</span><br><span class="line">ip addr</span><br></pre></td></tr></table></figure><p>之后开启网卡混杂模式</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ip <span class="built_in">link</span> <span class="built_in">set</span> ovs_eth0 promisc on</span><br><span class="line"></span><br></pre></td></tr></table></figure><p>最后创建docker的网络桥接</p><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker network create --driver=macvlan --subnet=192.168.123.0/24 --gateway=192.168.123.1 --ip-range=192.168.123.20/30 --opt parent=ovs_eth0 lemonnet</span><br></pre></td></tr></table></figure><p>这里参数我来解释一下</p><ul><li>subnet 主路由内网的ip范围 （按照自己家庭网络环境填写）</li><li>gateway 主路由内网的ip地址</li><li>ip range docker容器的ip地址范围 （按照你自己的需求定）</li><li>最后的lemonnet 自己起的名称，你也可以随便起</li></ul><p>打开群晖的docker面板 在映像里运行之后找到网络选项，然后网络这里改成刚才创建的桥接，正常配置即可</p><p><img src="https://pic.skira.top/Skirafile/clipboard-3516.webp" alt="clipboard-3516.webp"></p><p>配置成功之后就可以直接用ip加端口号进行使用啦</p><p><img src="https://pic.skira.top/Skirafile/clipboard-6486.webp" alt="clipboard-6486.webp"></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 桜紺狸の精选记录集 </tag>
+            
+            <tag> NAS </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>esp8266 接入homeassistant的实践</title>
+      <link href="/archives/6a16f043/"/>
+      <url>/archives/6a16f043/</url>
+      
+        <content type="html"><![CDATA[<h1 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h1><p>由于柠萌最近淘宝手里有很多小券就打算想找个便宜又好玩的东西玩。正好b站最近总是给咱推esp8266系列以及单片机的视频。手就很刺挠了，入了一块玩玩，就有了今天的教程记录了。</p><h1 id="1-esp8266-配合homeassistant实现温湿度实时显示（保姆级教程）"><a href="#1-esp8266-配合homeassistant实现温湿度实时显示（保姆级教程）" class="headerlink" title="1.esp8266 配合homeassistant实现温湿度实时显示（保姆级教程）"></a>1.esp8266 配合homeassistant实现温湿度实时显示（保姆级教程）</h1><h2 id="esphome的搭建（基于群晖7-2docker配置）"><a href="#esphome的搭建（基于群晖7-2docker配置）" class="headerlink" title="esphome的搭建（基于群晖7.2docker配置）"></a>esphome的搭建（基于群晖7.2docker配置）</h2><p>container manager打开后点击<strong>注册表</strong></p><div class="note default simple"><p>这里的话由于docker在国内被墙，需要科学上网。</p></div><p>输入esphome,下载最新版本即可</p><p><img src="https://pic.skira.top/Skirafile/clipboard-5640.webp" alt="clipboard-5640.webp"></p><p>在端口这里本地端口6052就行，变量这里<strong>USERNAME</strong> <strong>PASSWORD</strong> 内务必填写好你的用户名和密码即可部署完毕</p><p><img src="https://pic.skira.top/Skirafile/clipboard-2739.webp" alt="clipboard-2739.webp"></p><p>你的机器内网ip+6052端口号输入即可进入，esphome的webui界面，用户名和密码填你在docker的配置的即可。</p><p><img src="https://pic.skira.top/Skirafile/clipboard-6109.webp" alt="clipboard-6109.webp"></p><div class="note default simple"><p>首次进入的话不会有左上角的esp8266的一个栏，是空白的状态</p></div><p>点击右下角的绿色标识 <strong>newdevice</strong> 后弹出下面如图的弹窗点击<strong>CONTINUE</strong></p><p><img src="https://pic.skira.top/Skirafile/clipboard-1548.webp" alt="clipboard-1548.webp"></p><p>在这里的话是输入配置文件的名称，可以随便输入，柠萌这里的话就默认填esp8266好了</p><p><img src="https://pic.skira.top/Skirafile/clipboard-9178.webp" alt="clipboard-1548.webp"></p><p>输入完毕后会弹出设备选项，选<strong>esp8266</strong></p><p>弹出这个话就是配置好了，</p><div class="note default simple"><p>底下会显示一串key的密钥，请务必保存好</p></div><p>之后点击INSTALL即可</p><p><img src="https://pic.skira.top/Skirafile/clipboard-3042.webp" alt="clipboard-3042.webp"></p><p>点击CANCEL 接下来我们来配置一下yaml文件</p><p>点击EDIT,这里是默认所给出的配置文件，我们需要改一下内容</p><p><img src="https://pic.skira.top/Skirafile/clipboard-2499.webp" alt="clipboard-2499.webp"></p><p>这里的话有必要讲解一下内容，</p><div class="note default simple"><p>前面这些<strong>api</strong>，<strong>ota</strong> ，<strong>ap</strong>这些数值都不要动，按照默认的来，按需加入内容</p></div><p>WiFi这里填你自己的WiFi名称和密码， <strong>manual_ip:</strong> 这里填写固定的ip地址以及路由器的ip地址， <strong>sensor:</strong> 这里 <strong>pin</strong> 写自己所与杜邦线连接的gpio引脚</p><blockquote><p>我这里的话是这样 oata 接在esp8266的随便一个gpio引脚都可以，只需在配置文件里改正即可。</p></blockquote><p><img src="https://pic.skira.top/Skirafile/esp8266dht11.webp" alt="esp8266dht11.webp"></p><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">esphome:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">esp8266</span></span><br><span class="line">  <span class="attr">friendly_name:</span> <span class="string">esp8266</span></span><br><span class="line"></span><br><span class="line"><span class="attr">esp8266:</span></span><br><span class="line">  <span class="attr">board:</span> <span class="string">esp01_1m</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Enable logging</span></span><br><span class="line"><span class="attr">logger:</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Enable Home Assistant API</span></span><br><span class="line"><span class="attr">api:</span></span><br><span class="line">  <span class="attr">encryption:</span></span><br><span class="line">    <span class="attr">key:</span> <span class="string">&quot;gBZDX9+lyYluiJtupESyRKghj+RHK1dUBSzPIcvQDd4=&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ota:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">esphome</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">&quot;94cc3828b9966c4ab5ccbc4b005ec1&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">wifi:</span></span><br><span class="line">  <span class="attr">ssid:</span> <span class="string">&quot;你的WiFi名称&quot;</span></span><br><span class="line">  <span class="attr">password:</span> <span class="string">&quot;你的WiFi密码&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Enable fallback hotspot (captive portal) in case wifi connection fails</span></span><br><span class="line">  <span class="attr">ap:</span></span><br><span class="line">    <span class="attr">ssid:</span> <span class="string">&quot;Esp8266 Fallback Hotspot&quot;</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">&quot;VAI3mbrjBXlk&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">manual_ip:</span>                <span class="comment">#设置固定IP</span></span><br><span class="line">    <span class="attr">static_ip:</span> <span class="number">192.168</span><span class="number">.123</span><span class="number">.185</span></span><br><span class="line">    <span class="attr">gateway:</span> <span class="number">192.168</span><span class="number">.123</span><span class="number">.1</span></span><br><span class="line">    <span class="attr">subnet:</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">captive_portal:</span></span><br><span class="line"></span><br><span class="line"><span class="attr">web_server:</span>  <span class="comment">## web控制，添加了这2行，就可以在网页端打开设备ip;</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line"></span><br><span class="line"><span class="attr">sensor:</span>                      <span class="comment">#设置dht11传感器</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">dht</span></span><br><span class="line">    <span class="attr">pin:</span> <span class="string">GPIO4</span></span><br><span class="line">    <span class="attr">temperature:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">&quot;Temperature&quot;</span></span><br><span class="line">    <span class="attr">humidity:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">&quot;Humidity&quot;</span></span><br><span class="line">    <span class="attr">update_interval:</span> <span class="string">30s</span>    <span class="comment"># 数据每30s监测一次</span></span><br><span class="line">    <span class="attr">model:</span> <span class="string">&quot;DHT11&quot;</span></span><br><span class="line"></span><br><span class="line">  </span><br></pre></td></tr></table></figure><p>点击save保存</p><p>点击INSTALL选项，这里的话柠萌就展示第二种安装方法</p><p><img src="https://pic.skira.top/Skirafile/clipboard-8937.webp" alt="clipboard-8937.webp"></p><p>在这个步骤里可能等待的时间过于漫长，但还是请耐心等待，直到显示出 <strong>Download project</strong> 后点击下载所要烧录的文件</p><p><img src="https://pic.skira.top/Skirafile/clipboard-1668.webp" alt="clipboard-1668.webp"></p><p>下载完毕后点击  <strong>Open ESPHome Web</strong>，跳转页面</p><p>此时将你的esp8266 连接上电脑的usb口</p><p><img src="https://pic.skira.top/Skirafile/clipboard-0184.webp" alt="clipboard-0184.webp"></p><p>此时勾选esp8266的端口，</p><p><img src="https://pic.skira.top/Skirafile/clipboard-0207.webp" alt="clipboard-0207.webp"></p><p>点击INSTALL将刚刚下载的bin文件导入，即可开始烧录，等待进度条跑完。</p><p><img src="https://pic.skira.top/Skirafile/clipboard-7650.webp" alt="clipboard-7650.webp"></p><p><img src="https://pic.skira.top/Skirafile/clipboard-7328.webp" alt="clipboard-7328.webp"></p><p>此时就可以输入你在配置文件所填写的ip地址即可进入到烧录在esp8266的webui界面</p><p>此时如果能正常显示温湿度，那么在基于esphome上的配置就已经完毕了</p><p><img src="https://pic.skira.top/Skirafile/clipboard-9755.webp" alt="clipboard-9755.webp"></p><h2 id="与homeassistant进行绑定"><a href="#与homeassistant进行绑定" class="headerlink" title="与homeassistant进行绑定"></a>与homeassistant进行绑定</h2><h3 id="homeassistant的搭建（基于群晖7-2docker配置）"><a href="#homeassistant的搭建（基于群晖7-2docker配置）" class="headerlink" title="homeassistant的搭建（基于群晖7.2docker配置）"></a>homeassistant的搭建（基于群晖7.2docker配置）</h3><p>还是和上面的流程一样，搜索选择第一个安装</p><p><img src="https://pic.skira.top/Skirafile/clipboard-3167.webp" alt="clipboard-9755.webp"></p><p>这里的话储存空间设置里加上挂载&#x2F;config的目录，以便后续修改操作</p><p><img src="https://pic.skira.top/Skirafile/clipboard-8658.webp" alt="clipboard-8658.webp"></p><p>网络这里的话改成host模式，然后部署即可</p><p><img src="https://pic.skira.top/Skirafile/clipboard-2995.webp" alt="clipboard-2995.webp"></p><h3 id="将esphome绑定到homeassistant"><a href="#将esphome绑定到homeassistant" class="headerlink" title="将esphome绑定到homeassistant"></a>将esphome绑定到homeassistant</h3><blockquote><p>登录这里的话我就不细讲了，IP+8123端口后跳转注册页面，地区正确填写即可</p></blockquote><p>点击右下脚的新增整合</p><p><img src="https://pic.skira.top/Skirafile/clipboard-9443.webp" alt="clipboard-9443.webp"></p><p>搜索esphome，之后点击可能会稍微等待一会，直到出现这个页面</p><p><img src="https://pic.skira.top/Skirafile/clipboard-8952.webp" alt="clipboard-8952.webp"></p><p>输入你之前烧录到esp8266所配置的ip地址 <strong>端口号不要改变</strong></p><p>之后输入你在上面在esphome配置时保存的key并点击确认，出现成功提示后恭喜你已经成功将esphome绑定。</p><p><img src="https://pic.skira.top/Skirafile/clipboard-9802.webp" alt="clipboard-9802.webp"></p><p>此时就能正常的显示出它的温湿度信息啦</p><p><img src="https://pic.skira.top/Skirafile/clipboard-2440.webp" alt="clipboard-2440.webp"></p><h1 id="2-esp8266使用mos管模块控制小灯实现pwm无极调光"><a href="#2-esp8266使用mos管模块控制小灯实现pwm无极调光" class="headerlink" title="2.esp8266使用mos管模块控制小灯实现pwm无极调光"></a>2.esp8266使用mos管模块控制小灯实现pwm无极调光</h1><blockquote><p>当初本身我想做的是使用继电器控制小灯的开关，后期做了之后我并没有感到满意，晚上由于灯光不能调整，感觉会比较刺眼。</p></blockquote><h2 id="准备材料"><a href="#准备材料" class="headerlink" title="准备材料"></a>准备材料</h2><p>你需要一个<strong>mos开关驱动模块</strong>，一个带<strong>正负极线的小灯</strong>外加一个 <strong>按钮模块</strong>用于控制小灯的开关</p><p><img src="https://pic.skira.top/Skirafile/Screenshot_20241126-202145_%E6%B7%98%E5%AE%9D.webp" alt="Screenshot_20241126-202145_淘宝.webp"><img src="https://pic.skira.top/Skirafile/clipboard-8170.webp" alt="clipboard-8170.webp"></p><p><img src="https://pic.skira.top/Skirafile/clipboard-4560.webp" alt="clipboard-4560.webp"></p><p>这些小东西的话你都可以在淘宝上轻易的买到，而且的话价格也不是很贵</p><h2 id="所需代码"><a href="#所需代码" class="headerlink" title="所需代码"></a>所需代码</h2><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">esphome:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">esp8266</span></span><br><span class="line">  <span class="attr">friendly_name:</span> <span class="string">esp8266</span></span><br><span class="line"></span><br><span class="line"><span class="attr">esp8266:</span></span><br><span class="line">  <span class="attr">board:</span> <span class="string">esp01_1m</span></span><br><span class="line"></span><br><span class="line"><span class="attr">logger:</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#api和ota那用你自己的</span></span><br><span class="line"></span><br><span class="line"><span class="attr">wifi:</span></span><br><span class="line">  <span class="attr">ssid:</span> <span class="string">&quot;你的WiFi名称&quot;</span></span><br><span class="line">  <span class="attr">password:</span> <span class="string">&quot;你的密码&quot;</span></span><br><span class="line">  <span class="attr">ap:</span></span><br><span class="line">    <span class="attr">ssid:</span> <span class="string">&quot;Esp8266 Fallback Hotspot&quot;</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">&quot;5IUTqpzb6Nj1&quot;</span></span><br><span class="line">  <span class="attr">manual_ip:</span></span><br><span class="line">    <span class="attr">static_ip:</span> <span class="number">192.168</span><span class="number">.123</span><span class="number">.185</span></span><br><span class="line">    <span class="attr">gateway:</span> <span class="number">192.168</span><span class="number">.123</span><span class="number">.1</span></span><br><span class="line">    <span class="attr">subnet:</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line"></span><br><span class="line"><span class="attr">captive_portal:</span></span><br><span class="line"></span><br><span class="line"><span class="attr">web_server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">output:</span>   <span class="comment">#mos模块使用pwm调光控制</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">esp8266_pwm</span></span><br><span class="line">    <span class="attr">pin:</span> <span class="string">GPIO13</span>       <span class="comment"># 连接到MOSFET的栅极</span></span><br><span class="line">    <span class="attr">id:</span> <span class="string">pwm_output</span></span><br><span class="line">    <span class="attr">frequency:</span> <span class="number">3000 </span><span class="string">Hz</span> <span class="comment"># 设置PWM频率</span></span><br><span class="line"></span><br><span class="line"><span class="attr">light:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">monochromatic</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">&quot;Dimmer Light&quot;</span></span><br><span class="line">    <span class="attr">output:</span> <span class="string">pwm_output</span></span><br><span class="line">    <span class="attr">id:</span> <span class="string">dimmer_light</span></span><br><span class="line">    <span class="attr">default_transition_length:</span> <span class="string">0s</span></span><br><span class="line"><span class="attr">binary_sensor:</span>   <span class="comment">#控制按钮开关</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">gpio</span></span><br><span class="line">    <span class="attr">pin:</span></span><br><span class="line">      <span class="attr">number:</span> <span class="string">GPIO14</span></span><br><span class="line">      <span class="attr">mode:</span> <span class="string">INPUT_PULLUP</span></span><br><span class="line">      <span class="attr">inverted:</span> <span class="literal">True</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">&quot;Button&quot;</span></span><br><span class="line">    <span class="attr">on_press:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">light.toggle:</span> <span class="string">dimmer_light</span></span><br><span class="line"><span class="attr">sensor:</span>  <span class="comment">#温湿度传感器</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">dht</span></span><br><span class="line">    <span class="attr">pin:</span> <span class="string">GPIO5</span></span><br><span class="line">    <span class="attr">temperature:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">&quot;Temperature&quot;</span></span><br><span class="line">    <span class="attr">humidity:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">&quot;Humidity&quot;</span></span><br><span class="line">    <span class="attr">update_interval:</span> <span class="string">60s</span></span><br><span class="line">    <span class="attr">model:</span> <span class="string">&quot;DHT11&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure><h2 id="线路连接"><a href="#线路连接" class="headerlink" title="线路连接"></a>线路连接</h2><p><img src="https://pic.skira.top/Skirafile/clipboard-9427.webp" alt="clipboard-9427.webp"></p><p>esp8266的 GPIO13与gnd分别接入mos管模块的pwm与gnd接口，使用5v电源供电分别接入vin+与vin- 。小灯分别接入vout+与vout- 。</p><p>按钮模块连接：out与gnd，vcc分别接入esp8266的gpio14和gnd，3.3v处即可。</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实配置起来的话难度还好，不算太难，只不过写文章的时候倒是感觉很手酸呜呜呜，这样的话就又算做了一个记录，希望帮助咱自己的同时也能帮助到你呀。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 桜紺狸の精选记录集 </tag>
+            
+            <tag> esp8266 </tag>
+            
+            <tag> 单片机 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>在群晖上部署nastool全过程 by桜紺狸</title>
+      <link href="/archives/1d8d801b/"/>
+      <url>/archives/1d8d801b/</url>
+      
+        <content type="html"><![CDATA[<h1 id="在群晖上部署nastool全过程（待完善）"><a href="#在群晖上部署nastool全过程（待完善）" class="headerlink" title="在群晖上部署nastool全过程（待完善）"></a>在群晖上部署nastool全过程（待完善）</h1><h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2><blockquote><p>由于群晖自带的套件中心内有所提供大部分套件，本教程使用套件中心一件安装的方式进行演示，如果你是docker或者其他nas用户，你可以参考下官方的docker安装教程。</p></blockquote><p>首先你需要在套件中心内打开设置—套件来源—-添加<strong>矿神源</strong>  <a href="https://spk7.imnks.com/">https://spk7.imnks.com/</a></p><p>dsm6的话暂时无法使用，由于矿神源关闭了对dsm6系统的维护。</p><p><img src="https://pic.skira.top/Skirafile/01.webp" alt="01"></p><blockquote><p>所需安装的套件有nastool，jackett，以及scf中文字幕 分别搜索安装</p></blockquote><h2 id="调整"><a href="#调整" class="headerlink" title="调整"></a>调整</h2><h3 id="nastool配置"><a href="#nastool配置" class="headerlink" title="nastool配置"></a>nastool配置</h3><p>首先打开nastool，首次部署可能要等待一下才能显示出来页面，默认输入admin password后进入</p><p><img src="https://pic.skira.top/Skirafile/nastool2.webp" alt="2"></p><p>首次打开首页是一片空白，第一次咱进入的时候属实眼花缭乱，不知道如何下手。</p><p>咱们一步一步来。</p><h4 id="TMDB-KEY配置"><a href="#TMDB-KEY配置" class="headerlink" title="TMDB KEY配置"></a>TMDB KEY配置</h4><p>打开基础设置，找到TMDB API Key这个选项</p><p><img src="https://pic.skira.top/Skirafile/04nastool.webp" alt="04"></p><p><a href="https://www.themoviedb.org/login">点击这里</a>跳转到tmdb的官方注册页面，进行注册</p><p>注册完毕后在首页，点击你的头像后选择账户设置 —–api  然后复制你的api到上图</p><p><img src="https://pic.skira.top/Skirafile/nastppl03.webp" alt="03"></p><p>此时TMDB KEY就配置好了。这时即可开启资源搜索模式了</p><p><img src="https://pic.skira.top/Skirafile/nastool05.webp" alt="05"></p><h4 id="jackett配置"><a href="#jackett配置" class="headerlink" title="jackett配置"></a>jackett配置</h4><blockquote><p>首次部署时踩了一次坑，在尝试搜索的时候搜索不到磁力链接，这才发现这个是有必要进行配置的</p></blockquote><p>在群晖内安装好即可，首次进入可在首页保存api密钥，如果不配置公网密码可留空。</p><p><img src="https://pic.skira.top/Skirafile/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-07-13%20160708.webp" alt="01"></p><p>可以尝试将所有的公开站点全部勾选上即可.</p><p>进入nastool找到<strong>设置</strong>，,<strong>插件</strong>，并搜索Jackett插件安装</p><p><img src="https://pic.skira.top/Skirafile/2024-07-13%20161510.webp" alt="2024-07-13 161510.webp"></p><p>可在这里输入好你的apikey和地址并确定即可完成</p><p>接下来就可以测试是否运行成功了.</p><p>在nastool侧边栏找到<strong>设置</strong>，<strong>索引器</strong>，</p><blockquote><p>内建索引器内可以按自己所需勾选，<strong>以免负载过重导致搜索缓慢</strong></p></blockquote><p><img src="https://pic.skira.top/Skirafile/2024-07-13%20161801.webp" alt="2024-07-13 161801.webp"></p><p>随便尝试搜索资源，能正常获取到磁力就可以正常使用了。</p><p><img src="https://pic.skira.top/Skirafile/2024-07-13%20162329.webp" alt="2024-07-13 162329.webp"></p><h2 id="教程未结束-编辑时间-2024-7-13"><a href="#教程未结束-编辑时间-2024-7-13" class="headerlink" title="教程未结束 编辑时间 2024&#x2F;7&#x2F;13"></a>教程未结束 编辑时间 2024&#x2F;7&#x2F;13</h2>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> NAS </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>twkioo使用vercel部署全过程</title>
+      <link href="/archives/f66e1c0f/"/>
+      <url>/archives/f66e1c0f/</url>
+      
+        <content type="html"><![CDATA[<h1 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h1><p>由于咱粗心的把mongodb的数据删除后，<del>真的超不甘心啊</del>，😭 评论区近半年的数据又一次丢失，为了提醒自己，改掉这粗心的坏毛病，我打算自己写这么一篇安装文章，话不多说，我们开始把！</p><h1 id="所需的材料"><a href="#所需的材料" class="headerlink" title="所需的材料"></a>所需的材料</h1><p>一个·可以绑定twikoo的域名，vercel账号（使用github注册即可），mongodb账号（不会的找一下其他博客教程）</p><h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><h2 id="mongodb配置"><a href="#mongodb配置" class="headerlink" title="mongodb配置"></a>mongodb配置</h2><p>登入mongodb后新创建一个集群，地区选择 <code>AWS / N. Virginia (us-east-1)</code>，如图所示。全部配置完毕后点击<strong>Create Cluster</strong></p><p><img src="https://pic.skira.top/Skirafile/d41d8cd98f00b204e9800998ecf8427e.webp" alt="01"></p><p>配置好后在页面就能看到刚刚创建的数据库了，点击connect来准备后面的环境变量配置，如果你还没有添加<strong>数据库访问用户</strong>请下滑找到数据库用户配置教程，已添加可忽视。点击Drivers,找到这里，如图所示，请务必将下面的代码复制好，接下来在后面的步骤会用到。xxxxx为你的<strong>用户名和密码</strong>，<strong>下面是例子请不要复制</strong>。</p><p><img src="https://pic.skira.top/Skirafile/d1ds2.webp" alt="https://pic.skira.top/Skirafile/d1ds2.webp"></p><p><img src="https://pic.skira.top/Skirafile/120445.webp" alt="https://pic.skira.top/Skirafile/120445.webp"></p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mongodb+srv://xxxxx:xxxxx@cluster0.6c2trlq.mongodb.net/?retryWrites=true&amp;w=majority</span><br></pre></td></tr></table></figure><p>配置ip白名单，点击侧边栏的Network Access点击 ADD IP ADDRESS选项，将0.0.0.0的ip地址添加到内，点击<strong>confirm</strong>即可，如图所示</p><p><img src="https://pic.skira.top/Skirafile/112509.webp" alt="https://pic.skira.top/Skirafile/112509.webp"></p><p><img src="https://pic.skira.top/Skirafile/112630.webp" alt="https://pic.skira.top/Skirafile/112630.webp"></p><p>添加<strong>数据库访问用户</strong>点击侧边栏内的Database Access选项，点击ADD NEW DATABASE USER选项，第一栏添加你的用户名，第二栏密码，选择随机密码或者自己能记得住的都行，推荐<strong>随机密码</strong>，会更安全一些，完毕后点击ADD USER即可，如图所示</p><p><img src="https://pic.skira.top/Skirafile/113727.webp" alt="https://pic.skira.top/Skirafile/113727.webp"></p><p><img src="https://pic.skira.top/Skirafile/114032.webp" alt="https://pic.skira.top/Skirafile/114032.webp"></p><div class="note warning modern"><p>请务必牢记你的<strong>密码</strong>和<strong>用户名</strong>，因为接下来会用到</p></div><h2 id="Vercel配置"><a href="#Vercel配置" class="headerlink" title="Vercel配置"></a>Vercel配置</h2><p><a href="https://vercel.com/import/project?template=https://github.com/imaegoo/twikoo/tree/main/src/server/vercel-min">点击以下链接</a>将twikoo部署到vercel内即可.</p><p>备用链接：官网<a href="https://twikoo.js.org/quick-start.html#vercel-%E9%83%A8%E7%BD%B2">点击此处</a></p><p>Repository Name内输入部署名称点击create即可，如图所示。稍等片刻即可部署完毕。</p><p><img src="https://pic.skira.top/Skirafile/114722.webp" alt="07"></p><h2 id="环境变量配置"><a href="#环境变量配置" class="headerlink" title="环境变量配置"></a>环境变量配置</h2><p>在Vercel打开你在上一步所命名的项目，点击Settings，点击Environment Variables，在Key下面空白处填写值</p><p>为 <code>MONGODB_URI</code> ,Value值为在mongodb所复制的代码点击ADD another 点击save并保存。</p><p><img src="https://pic.skira.top/Skirafile/115136.webp" alt="https://pic.skira.top/Skirafile/115136.webp"></p><h2 id="重新构建"><a href="#重新构建" class="headerlink" title="重新构建"></a>重新构建</h2><p>在项目内找到Deployments选项，点击Redeploy选项即可。如图所示</p><p><img src="https://pic.skira.top/Skirafile/121027.webp" alt="https://pic.skira.top/Skirafile/121027.webp"></p><p><img src="https://pic.skira.top/Skirafile/121138.webp" alt="https://pic.skira.top/Skirafile/121138.webp"></p><h2 id="查看效果"><a href="#查看效果" class="headerlink" title="查看效果"></a>查看效果</h2><p>在项目首页点击visit打开后提示以下内容即为部署正确，如果出现其他内容，请按照步骤重新开始。</p><p><img src="https://pic.skira.top/Skirafile/121316.webp" alt="https://pic.skira.top/Skirafile/121316.webp"></p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&quot;code&quot;:100,&quot;message&quot;:&quot;Twikoo 云函数运行正常，请参考 https://twikoo.js.org/quick-start.html#%E5%89%8D%E7%AB%AF%E9%83%A8%E7%BD%B2 完成前端的配置&quot;,&quot;version&quot;:&quot;1.6.17&quot;&#125;</span><br></pre></td></tr></table></figure><blockquote><p>到这步的话，twikoo就已经配置完毕了，可以使用vercel自带的域名访问，并填入你的主题配置文件即可。但由于vercel的域名在国内处于被墙状态，如果想在国内访问需要更换域名为你自己的即可。</p></blockquote><h2 id="更换域名"><a href="#更换域名" class="headerlink" title="更换域名"></a>更换域名</h2><p>点击Settings点击Domains，在下面输入你的域名，打开你的域名服务商，选择Cname 将vercel-dns.com填入即可。</p><p><img src="https://pic.skira.top/Skirafile/122040.webp" alt="https://pic.skira.top/Skirafile/122040.webp"></p><h1 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h1><p>本教程到这里就结束啦，如果有其他疑问，可以在评论区内留言，咱看到了话会及时回复，在这里也感谢看到这里，十分蟹蟹😊</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 桜紺狸の精选记录集 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>屏蔽群晖系统升级并去除群晖桌面小红点配置</title>
+      <link href="/archives/8186ed29/"/>
+      <url>/archives/8186ed29/</url>
+      
+        <content type="html"><![CDATA[<h1 id="1-添加定时任务"><a href="#1-添加定时任务" class="headerlink" title="1.添加定时任务"></a>1.添加定时任务</h1><blockquote><p>群晖控制面板，任务计划，新增，任务名称可以随便写，只要不和已有的任务同名即可，我这写的是：update；</p></blockquote><p><img src="https://ik.imagekit.io/skira/skirablog/nasupdatefix/e8059811450b854a7b77cc653761282d.webp?updatedAt=1691323448708" alt="01"></p><h1 id="2-配置任务规则"><a href="#2-配置任务规则" class="headerlink" title="2.配置任务规则"></a>2.配置任务规则</h1><blockquote><p>点任务设置，复制以下内容进去以后，点确定</p></blockquote><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mv /usr/syno/synoman/synoSDSjslib/images/default/1x/dsm5_badge_num.png /usr/syno/synoman/synoSDSjslib/images/default/1x/dsm5_badge_num_bak.png</span><br><span class="line">mv /usr/syno/synoman/synoSDSjslib/images/default/2x/dsm5_badge_num.png /usr/syno/synoman/synoSDSjslib/images/default/1x/dsm5_badge_num_bak.png</span><br><span class="line">wget -O /usr/syno/synoman/synoSDSjslib/images/default/1x/dsm5_badge_num.png https://www.skira.top/img/nasupdate/transparent.png</span><br><span class="line">wget -O /usr/syno/synoman/synoSDSjslib/images/default/2x/dsm5_badge_num.png https://www.skira.top/img/nasupdate/transparent.png</span><br><span class="line">echo &quot;127.0.0.1 update.synology.com&quot; &gt; /etc/hosts</span><br></pre></td></tr></table></figure><p><img src="https://ik.imagekit.io/skira/skirablog/nasupdatefix/e4db1c8495a62591d43f49d592ffbe00.webp?updatedAt=1691323448710" alt="02"></p><h1 id="3-运行"><a href="#3-运行" class="headerlink" title="3.运行"></a>3.运行</h1><blockquote><p>在这条任务计划上面点右键</p></blockquote><p><img src="https://ik.imagekit.io/skira/skirablog/nasupdatefix/29a7a3e48674800c30183650306fe2cd.webp?updatedAt=1691323448477" alt="03"></p><h1 id="4-清除并验证"><a href="#4-清除并验证" class="headerlink" title="4.清除并验证"></a>4.清除并验证</h1><blockquote><p>下面我们来验证一下：群晖不需要重启，只需要关掉电脑的浏览器，清除一下缓存，然后打开浏览器重新登录群晖，你会发现群晖桌面没有小红点了</p></blockquote><p><img src="https://ik.imagekit.io/skira/skirablog/nasupdatefix/f349c8c1d3c97f7671cb2863b24fa8ba.webp?updatedAt=1691323448479" alt="04"></p><blockquote><p>再验证一下控制面板，更新和还原，虽然会显示一个红色的1字，但是状态会显示“连接失败。请检查Intelnet连接。”，不能更新系统。即为配置成功啦</p></blockquote><div class="note warning modern"><p>本教程桜紺狸在自己的黑群晖6.2版本下配置成功，本教程或许不适用于6.2.4及以上版本</p></div><blockquote><p>本教程转载自<a href="https://wp.gxnas.com的文章,仅供自己记录教程方便阅读使用,如有侵权问题咱会及时下架/">https://wp.gxnas.com的文章，仅供自己记录教程方便阅读使用，如有侵权问题咱会及时下架</a></p></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> NAS </tag>
+            
+            <tag> 转载 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>openwrt相关问题笔记 by桜紺狸</title>
+      <link href="/archives/ebe9814e/"/>
+      <url>/archives/ebe9814e/</url>
+      
+        <content type="html"><![CDATA[<h1 id="openclash直连应用掉速的问题解决-2021-11-07"><a href="#openclash直连应用掉速的问题解决-2021-11-07" class="headerlink" title="openclash直连应用掉速的问题解决 2021-11-07"></a>openclash直连应用掉速的问题解决 2021-11-07</h1><p>离谱，刚刚在酷安发布多次都无法审核通过，真的心态崩了，不想多说什么了。🙁<br>前段时间在使用open clash时发现经过直连的应用会发生明显掉速的情况，这个问题一直苦恼了我很久始终无法解决，所以在昨天进行了反复排查了几个小时终于找出了问题的原因<br><strong>解决方法:<strong>强烈建议硬路由使用Redir-Host模式而不是FACK-IP模式因为FACK-IP模式会导致不管是否是直连包括本地服务都会经过openclash处理导致cpu负担加重降低路由的收发速度。<br><img src="https://im.lemonbuluo.eu.org/file/a1c16037983f607a3938e.png" alt="配置教程"><br>将直连和bt以及常用端口进行排除，</strong>仅代理命中规则流量</strong>，<strong>仅允许常用端口流量</strong>柠萌建议均开启，尤其重中之重的是请务必打开<strong>绕过中国大陆IP</strong>。将大部分国内可访问应用排除openclash过滤中，可有效减轻cpu负担</p><h3 id="方法一可明显降低cpu占用导致卡顿问题。"><a href="#方法一可明显降低cpu占用导致卡顿问题。" class="headerlink" title="方法一可明显降低cpu占用导致卡顿问题。"></a>方法一可明显降低cpu占用导致卡顿问题。</h3><p><strong>如果需要解决WiFi直连掉速问题，可以尝试方法二，两种方法同时使用可以明显改善在无线和有线之间的访问速度。</strong></p><h3 id="方法二：在大部分openwrt硬路由的固件中都有添加Turbo-ACC加速模块，在网络选项中即可找到，如果没有预装的话可以尝试手动编译安装或者下载自带turbo-acc的固件"><a href="#方法二：在大部分openwrt硬路由的固件中都有添加Turbo-ACC加速模块，在网络选项中即可找到，如果没有预装的话可以尝试手动编译安装或者下载自带turbo-acc的固件" class="headerlink" title="方法二：在大部分openwrt硬路由的固件中都有添加Turbo ACC加速模块，在网络选项中即可找到，如果没有预装的话可以尝试手动编译安装或者下载自带turbo acc的固件"></a>方法二：在大部分openwrt硬路由的固件中都有添加Turbo ACC加速模块，在网络选项中即可找到，如果没有预装的话可以尝试手动编译安装或者下载自带turbo acc的固件</h3><p><img src="https://im.lemonbuluo.eu.org/file/bd6c0a0cff1ce1ceafd41.png" alt="配置教程2"><br>经过柠萌多次测试中， 开启Flow Offloading 转发加速以及BBR加速后可以同时增加WiFi直连访问速度，也可降低翻墙时所访问的延时问题。<br>本次的教程结束啦，感谢各位的观看，欢迎在评论区留言，我会及时回复鸭 (｡･ω･｡)ﾉ♡</p><h1 id="关于openclash自定义规则设置-2023-7-22"><a href="#关于openclash自定义规则设置-2023-7-22" class="headerlink" title="关于openclash自定义规则设置 2023.7.22"></a>关于openclash自定义规则设置 2023.7.22</h1><blockquote><p>配置绕过代理域名白名单，可解决内网下使用域名访问走代理导致速度变慢</p></blockquote><p>首先打开，openclash界面，打开覆写设置，点击规则设置，<strong>勾选自定义规则</strong> 点击下方的第一行配置文件，找到<strong>rules:</strong> 在下面加上<br><img src="https://im.lemonbuluo.eu.org/file/55c12909f2a63e66c90da.png" alt="01"></p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">- DOMAIN-SUFFIX,baidu.com,DIRECT</span><br></pre></td></tr></table></figure><p>意思是使用baidu.com的域名将全部走直连，这样配置就不会走代理啦</p><div class="note warning modern"><p>按照需要会不定时更新内容，未完结，仅供笔记记录</p></div><h1 id="关于openwrt内动态dns使用cloudflare教程-2023-7-24"><a href="#关于openwrt内动态dns使用cloudflare教程-2023-7-24" class="headerlink" title="关于openwrt内动态dns使用cloudflare教程 2023.7.24"></a>关于openwrt内动态dns使用cloudflare教程 2023.7.24</h1><blockquote><p>在动态dns页面随机输入数字或者字母即可，点击添加<br>DDNS服务提供商选择<strong>cloudflare v4</strong>并更改提供者</p></blockquote><p><img src="https://im.lemonbuluo.eu.org/file/0052d3a655bc824bb5bd2.png" alt="01"><br><img src="https://im.lemonbuluo.eu.org/file/137094b0689416b4eb1dd.png" alt="02"></p><blockquote><p>勾选启用，在查询主机名内填写你的域名地址,在域名位置也是填写一样的内容</p></blockquote><ul><li>例 xxxx.com</li></ul><h3 id="附加配置项"><a href="#附加配置项" class="headerlink" title="附加配置项"></a>附加配置项</h3><p><img src="https://im.lemonbuluo.eu.org/file/08f951bb031a3c4f86e2d.png" alt="06"><br>如果是旁路由或者nas无法获取公网IP地址的还需加入<br>点击高级设置 IP 地址来源 [IPv4] 选择URL，用于检测地址填写 <a href="http://ip.3322.net/">http://ip.3322.net/</a></p><p>在用户名处填写 <strong>Bearer</strong>,密码填写<strong>自定义的api令牌</strong>，点击保存并应用即可啦</p><h2 id="关于cloudflare创建自定义api令牌"><a href="#关于cloudflare创建自定义api令牌" class="headerlink" title="关于cloudflare创建自定义api令牌"></a>关于cloudflare创建自定义api令牌</h2><p>进入 <a href="https://dash.cloudflare.com/profile/api-tokens">https://dash.cloudflare.com/profile/api-tokens</a> 页面，点击创建令牌，下拉找到创建自定义令牌并点击<br><img src="https://im.lemonbuluo.eu.org/file/40aa3cd7fe306156b28da.png" alt="03"></p><blockquote><p>按照如下图配置即可,编辑你的名称，例如openwrt，权限点击区域————DNS———编辑。区域资源内选择包括——特定区域——（选择你所要配置的域名）配置好后拉到最后，继续以显示摘要</p></blockquote><p><img src="https://im.lemonbuluo.eu.org/file/6f130cf4998a7f01f81fc.png" alt="04"></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> openwrt </tag>
+            
+            <tag> 硬路由 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Nginx proxy manager 配置笔记 by桜紺狸</title>
+      <link href="/archives/5607dff5/"/>
+      <url>/archives/5607dff5/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Nginx-proxy-manager-一些问题解决-2022-12-26"><a href="#Nginx-proxy-manager-一些问题解决-2022-12-26" class="headerlink" title="Nginx proxy manager 一些问题解决 2022.12.26"></a>Nginx proxy manager 一些问题解决 2022.12.26</h1><blockquote><p>温馨提示，本教程不提供npm的搭建方法，如果是首次搭建推荐文章  <a href="https://blog.laoda.de/archives/host-static-sites-on-npm">https://blog.laoda.de/archives/host-static-sites-on-npm</a> 咕咕的教程，写的算比较详细的</p></blockquote><h2 id="1-让Nginx-proxy-manager-在非80-443端口下也能使用反代"><a href="#1-让Nginx-proxy-manager-在非80-443端口下也能使用反代" class="headerlink" title="1.让Nginx proxy manager 在非80 443端口下也能使用反代"></a>1.让Nginx proxy manager 在非80 443端口下也能使用反代</h2><p>柠萌写这篇文章最近是深受这个问题的苦恼，咱也是最近才搭好的，感觉在公网环境下搭配dynu dns使用证书续签还是比较好用的，只不过在公网无法使用80，443端口下npm反代却无法更改其他端口，在查阅了很多资料后进行了一些尝试，总算可以正常使用其他端口了。对此问题有困扰的可以按照接下来的步骤进行操作。</p><p>打开portainer面板，打开npm的容器并点击编辑，<strong>开放你需要反代的端口</strong>，柠萌按照3060端口举例，设置好后点击下脚部署容器，稍等片刻后重新登录npm面板</p><img src="https://npm.elemecdn.com/lemonfunny-pic@0.0.12/012.png" style="zoom: 50%;" /><p>登录后前面按照正常配置后，打开advanced填入</p><figure class="highlight php"><table><tr><td class="code"><pre><span class="line">listen port ssl http2;</span><br></pre></td></tr></table></figure><ul><li>其中port改成你需要开放的端口</li></ul><img src="https://npm.elemecdn.com/lemonfunny-pic@0.0.11/011.png" alt="步骤1" style="zoom: 50%;" /><p>点击save并保存，然后在路由器内开放端口即可正常用域名加端口号访问啦</p><h2 id="2-npm单域名不能设置多个端口解决"><a href="#2-npm单域名不能设置多个端口解决" class="headerlink" title="2.npm单域名不能设置多个端口解决"></a>2.npm单域名不能设置多个端口解决</h2><p>如果小伙伴们只有一个域名的话，可能按照柠萌上面的步骤操作后会发现，诶？？？提示了已在使用了，在域名后面直接加端口域名就无法正常打开的问题，那有没有什么其他办法解决呢，当然有~~~，按照柠萌的下一步操作吧</p><img src="https://npm.elemecdn.com/lemonfunny-pic@0.0.13/13.png" style="zoom:50%;" /><p>你可以将域名改成内网ip＋端口号的形式操作，这样的话你会发现可以正常的添加其他端口号，使用域名加端口形式也可正常访问，那么恭喜你已经成功配置啦</p><img src="https://npm.elemecdn.com/lemonfunny-pic@0.0.14/14.png" alt="14" style="zoom: 50%;" /><h1 id="npm使用cloudflare-DNS验证获取证书-2023-7-23"><a href="#npm使用cloudflare-DNS验证获取证书-2023-7-23" class="headerlink" title="npm使用cloudflare DNS验证获取证书 2023.7.23"></a>npm使用cloudflare DNS验证获取证书 2023.7.23</h1><blockquote><p>1.点击SSL Certificates，转到SSL Certificates页面；再点击右上角Add SSL Certificate，选择Let’s Encrypt。</p></blockquote><blockquote><p>2.打开Use a DNS Challenge，DNS Provider选择<strong>cloudflare</strong>.正确操作后，如图所示</p></blockquote><p><img src="https://im.lemonbuluo.eu.org/file/a050c8692fda00dd7a716.png" alt="02"></p><div class="note warning modern"><p>注意，这时需要先修改Credentials File Content内的内容，否则无法成功申请证书，修改为</p></div><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dns_cloudflare_email = xxx@163.com</span><br><span class="line">dns_cloudflare_api_key = 114514</span><br></pre></td></tr></table></figure><p>邮箱为你使用的cloudflare注册的邮箱<br>apikey为 <a href="https://dash.cloudflare.com/profile/api-tokens">https://dash.cloudflare.com/profile/api-tokens</a> 打开这个页面找到Global API Key输入密码后点击查看即可。<br>然后点击勾选同意后点击save，等待一会转圈圈即可成功获取到https证书啦😊</p><h1 id="3-利用npm反代功能只需开放一个端口，即可对全屋设备访问"><a href="#3-利用npm反代功能只需开放一个端口，即可对全屋设备访问" class="headerlink" title="3.利用npm反代功能只需开放一个端口，即可对全屋设备访问"></a>3.利用npm反代功能只需开放一个端口，即可对全屋设备访问</h1>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 桜紺狸の精选记录集 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>本站最新公告与通知</title>
+      <link href="/archives/e1e728f5/"/>
+      <url>/archives/e1e728f5/</url>
+      
+        <content type="html"><![CDATA[<div class="note warning flat"><p>由于本站盘站技术故障导致大部分数据丢失，目前正在重建并尝试恢复盘站请各位耐心等待，如有需要可以在本群内获取，谢谢。测试</p></div>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>桜紺狸のNPM配置记录测试</title>
+      <link href="/archives/25263640/"/>
+      <url>/archives/25263640/</url>
+      
+        <content type="html"><![CDATA[<div class="note info flat"><p>本教程记录的柠萌在Windows安装npm所部署的完整步骤，本教程供个人使用，欢迎阅读转载请务必经过本人许可谢谢</p></div><h1 id="npm安装过程"><a href="#npm安装过程" class="headerlink" title="npm安装过程"></a>npm安装过程</h1><blockquote><p>1.官网下载地址 <a href="https://nodejs.org/en/download/">https://nodejs.org/en/download/</a> 复制打开下载即可</p></blockquote><h2 id="2-配置安装路径"><a href="#2-配置安装路径" class="headerlink" title="2.配置安装路径"></a>2.配置安装路径</h2><blockquote><p>这个的话按照你自己随意，柠萌就设置自己的安装路径喽了o(<em>￣▽￣</em>)o</p></blockquote><img src="https://s2.loli.net/2022/07/07/fi6jYOkFHdhASaC.png" alt="npm安装过程" style="zoom: 80%;" /><p>然后<strong>下一步</strong>按照默认来就行点击<strong>next</strong></p><h2 id="3-安装过程"><a href="#3-安装过程" class="headerlink" title="3.安装过程"></a>3.安装过程</h2><blockquote><p>这一步柠萌靠机器翻译了一下，<del>绝对不是不会英语的啦</del>,自动安装必要的工具，不用勾选，后期再补充就行，跳过接着点击next并给与管理员权限</p></blockquote><img src="https://s2.loli.net/2022/07/07/idepRtL18kJvqom.png" alt="npm2" style="zoom:80%;" /><h2 id="4-安装完毕"><a href="#4-安装完毕" class="headerlink" title="4.安装完毕"></a>4.安装完毕</h2><blockquote><p>行了，这就安装完了，接下来测试安装完整性</p></blockquote><img src="https://s2.loli.net/2022/07/07/Jx9cjQmKyfCLeaW.png" alt="03" style="zoom:80%;" /><h2 id="5-测试npm是否安装成功"><a href="#5-测试npm是否安装成功" class="headerlink" title="5.测试npm是否安装成功"></a>5.测试npm是否安装成功</h2><p>打开搜索或者win+r打开输入cmd打开命令提示符</p><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#输入</span><br><span class="line">node -v  #查看node版本号</span><br><span class="line">npm -v #查看npm版本号</span><br></pre></td></tr></table></figure><img src="https://s2.loli.net/2022/07/07/ahcm7qipY5RoDEu.png" alt="04" style="zoom:80%;" /><h1 id="npm环境配置"><a href="#npm环境配置" class="headerlink" title="npm环境配置"></a>npm环境配置</h1><h2 id="1-将npm安装路径改成D盘或其它盘符"><a href="#1-将npm安装路径改成D盘或其它盘符" class="headerlink" title="1.将npm安装路径改成D盘或其它盘符"></a>1.将npm安装路径改成D盘或其它盘符</h2><blockquote><p>说明：这里的环境配置主要配置的是npm安装的全局模块所在的路径，以及缓存cache的路径，之所以要配置，是因为以后在执行类似：npm install express [-g] （后面的可选参数-g，g代表global全局安装的意思）的安装语句时，会将安装的模块安装到【C:\Users\用户名\AppData\Roaming\npm】路径中，占C盘空间。</p></blockquote><p><strong>在安装的路径下</strong>创建两个文件夹【node_global】及【node_cache】</p><img src="https://s2.loli.net/2022/07/07/jWsTOqpmwHUMnA3.png" alt="05" style="zoom: 67%;" /><p>创建完两个空文件夹之后，打开cmd命令窗口，输入</p><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">npm config <span class="built_in">set</span> prefix &quot;D:\lemonapps\nodejs\node_global&quot;  #注意后面的路径换成你自己的</span><br><span class="line">npm config <span class="built_in">set</span> cache &quot;D:\lemonapps\nodejs\node_cache&quot;</span><br></pre></td></tr></table></figure><h2 id="2-修改环境变量"><a href="#2-修改环境变量" class="headerlink" title="2.修改环境变量"></a>2.修改环境变量</h2><blockquote><p>打开我的电脑”-右键-“属性”-“高级系统设置”-“高级”-“环境变量”</p></blockquote><img src="https://s2.loli.net/2022/07/07/1FAYl4MEpCmSk3r.png" style="zoom:67%;" /><p>进入环境变量对话框，在【系统变量】下新建【NODE_PATH】，输入【D:\lemonapps\nodejs\node_global\node_modules】</p><img src="https://s2.loli.net/2022/07/07/5famCl8tuoIsnSP.png" style="zoom:67%;" /><p><strong>转到用户变量</strong>，将【用户变量】下的【Path】修改为【D:\lemonapps\nodejs\node_global】</p><img src="https://s2.loli.net/2022/07/07/ain6CT5kyuPUEcm.png" style="zoom:67%;" /><p>修改完毕后点击确定按钮就行啦了o(<em>￣▽￣</em>)o</p><h2 id="测试全局安装"><a href="#测试全局安装" class="headerlink" title="测试全局安装"></a>测试全局安装</h2><p>打开命令提示符，输入</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">npm install express -g     # -g是全局安装的意思</span><br></pre></td></tr></table></figure><p><strong>如果能正常安装，那么恭喜你，npm已经安装完毕。</strong></p><div class="note warning modern"><p>如果遇到报错也没关系，下面继续会讲解决方法。</p></div><img src="https://s2.loli.net/2022/07/07/7qJdWozPA6nscYX.png" style="zoom: 67%;" /><h1 id="npm错误解决"><a href="#npm错误解决" class="headerlink" title="npm错误解决"></a>npm错误解决</h1><h2 id="错误1"><a href="#错误1" class="headerlink" title="错误1"></a>错误1</h2><p>比如我在这里，输入npm -v的过程中报了一个错误</p><p><img src="https://s2.loli.net/2022/07/07/erDMUv85S1qpdus.png"></p><p><strong>解决方法</strong></p><p>打开你安装node的安装目录</p><img src="https://s2.loli.net/2022/07/07/kNQ4B1eTvOoxzKj.png" style="zoom:67%;" /><p>分别打开npm和npm.cmd文件夹可以用系统自带的记事本打开，这里默认用notpad++</p><p><strong>找到npm内NPM_PREFIX&#x3D;&#96;”$NODE_EXE” “$NPM_CLI_JS”这里</strong>prefix -g替换为prefix –location&#x3D;global</p><blockquote><p>下面的也是一样</p><p>FOR &#x2F;F “delims&#x3D;” %%F IN (‘CALL “%NODE_EXE%” “%NPM_CLI_JS%” 后面prefix -g替换为prefix –location&#x3D;global</p></blockquote><img src="https://s2.loli.net/2022/07/07/uarjhHEB3qRmeGv.png" style="zoom:67%;" /><p>然后就可以恢复正常了</p><h2 id="错误2"><a href="#错误2" class="headerlink" title="错误2"></a>错误2</h2><img src="https://s2.loli.net/2022/07/07/7qJdWozPA6nscYX.png" style="zoom:67%;" /><blockquote><p>在按照教程配置好后，最后一步发生这种情况柠萌也同样遇到了</p></blockquote><p><strong>解决方法</strong></p><p>打开C盘用户文件夹路径，可以找到**.npmrc**的文件，然后将这个文件删除即可</p><blockquote><p>如果找不到打开点击上方查看，显示隐藏文件即可。</p></blockquote><img src="https://s2.loli.net/2022/07/07/1TIW7iMFgV8Nbvt.png" style="zoom:67%;" /><blockquote><p>重新测试安装,已恢复正常</p></blockquote><img src="https://s2.loli.net/2022/07/07/Qy9GcnlHg3NOEka.png" style="zoom:67%;" />]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 桜紺狸の精选记录集 </tag>
+            
+            <tag> NPM </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>随身WiFi的各种折腾记录 （随机更新连载中）</title>
+      <link href="/archives/a57f6ad8/"/>
+      <url>/archives/a57f6ad8/</url>
+      
+        <content type="html"><![CDATA[<div class="note warning modern"><p>本期提示，本教程主要记录随身WiFi的刷机过程以及自己的配置记录的总结，主要的目的是记录和公开分享，本教程非原创。分别从不同刷机配置中总结精华，杠精请退出谢谢，有疑问可以在评论区反馈看到会回复的诶😊</p></div><blockquote><p>本期教程在此前排 感谢 <a href="https://www.coolapk.com/u/18497574">@酱紫表</a>的博客让我发现了便宜的随身WiFi并开始入坑一发不可收拾。<a href="https://www.coolapk.com/u/1457910">@伏莱兮浜</a>的教程让我开始就刷成功了。前排感谢两位大佬<a href="https://www.coolapk.com/u/15267090">handsomehacker</a>的移植和 <a href="https://www.coolapk.com/u/2013314">苏苏小亮亮</a>的适配openwrt以及Debian的付出。v(๑•̀ㅂ•́)و✧</p></blockquote><h2 id="随身WiFi的全盘备份"><a href="#随身WiFi的全盘备份" class="headerlink" title="随身WiFi的全盘备份"></a>随身WiFi的全盘备份</h2><h3 id="使用miko备份棒子"><a href="#使用miko备份棒子" class="headerlink" title="使用miko备份棒子"></a>使用miko备份棒子</h3><div class="note info flat"><p>为什么要备份呐了(￣▽￣)*，刷随身WiFi备份后可以避免刷机过程中导致的问题，比如无法启动变砖等各种无法正常开机的问题可以使用本程序救砖确保万无一失。</p></div><p><strong>本期教程资源可在盘站内获取</strong> <a href="https://pan.lemonbuluo.top/%E5%8D%9A%E5%AE%A2%E6%96%87%E4%BB%B6%E5%A4%B9/%E9%9A%8F%E8%BA%ABWiFi%E5%B7%A5%E5%85%B7/">点我即可下载</a></p><div class="hide-block"><button type="button" class="hide-button" style="">查看密码    </button><div class="hide-content"><p>lmsswfpz</p></div></div><h4 id="安装前准备配置"><a href="#安装前准备配置" class="headerlink" title="安装前准备配置"></a>安装前准备配置</h4><p>1.将你的随身WiFi插入到电脑usb接口上并安装<strong>安卓驱动后</strong>打开设备管理器，查看是否出现android设备</p><img src="https://npm.elemecdn.com/lemonfunny-blogpic@0.0.6/202207021153550.png" alt="01" style="zoom: 50%;" /><p>解压安装来自盘站内的miko程序，安装后里面有一个5m大小同图标的exe文件,将它移动到你安装miko的目录上</p><img src="https://npm.elemecdn.com/lemonfunny-blogpic@0.0.5/202207021149585.png" alt="02" style="zoom:50%;" /><blockquote><p>注意：如果你没有安装电脑端adb调试工具可以使用本教程自带的miflash工具或者秋之盒进入9008模式</p></blockquote><p><strong>打开终端命令行 cmd，进入9008模式</strong></p><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">adb shell</span><br><span class="line">reboot edl</span><br></pre></td></tr></table></figure><h4 id="使用miko进行全盘备份"><a href="#使用miko进行全盘备份" class="headerlink" title="使用miko进行全盘备份"></a>使用miko进行全盘备份</h4><div class="note info flat"><p>此步骤请务必按照教程操作，仔细看步骤否则可能会导致备份失败或者无法恢复各种问题</p></div><p>1.在安装目录双击打开miko主程序</p><img src="https://npm.elemecdn.com/lemonfunny-blogpic@0.0.7/202207021203883.png" alt="03" style="zoom:50%;" /><p>按照步骤第一步点击<strong>read</strong>，后点击下面第二个<strong>PartitionBackup Erase</strong> 选择下面的<strong>LoadPartition Structure</strong>获取分区表信息，</p><blockquote><p>如果这一步报错，请按照上面的配置重新进9008模式</p></blockquote><p>双击<strong>Double chick Open Save Folder</strong> 选择安装保存路径后<strong>最后一步最为关键</strong>，点击<strong>Read Full image</strong>,后将打开你所设置的路径，配置好文件名后即可开始备份</p><p><strong>注意右侧的success出现下方的进度条跑满即可拔出随身WiFi，即可备份成功啦</strong></p><p><strong>未完结，持续更新中</strong></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 随身WiFi </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>桜紺狸博客常用配置记录</title>
+      <link href="/archives/1c9aa8da/"/>
+      <url>/archives/1c9aa8da/</url>
+      
+        <content type="html"><![CDATA[<h2 id="多彩外挂标签"><a href="#多彩外挂标签" class="headerlink" title="多彩外挂标签"></a>多彩外挂标签</h2><h3 id="1-simple类型"><a href="#1-simple类型" class="headerlink" title="1.simple类型"></a>1.simple类型</h3><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% note simple %&#125;</span><br><span class="line">默认提示快标签（白色无图标）</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note default simple %&#125;</span><br><span class="line">default 提示塊標籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note primary simple %&#125;</span><br><span class="line">primary 提示塊標籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note success simple %&#125;</span><br><span class="line">success 提示塊標籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note info simple %&#125;</span><br><span class="line">info 提示塊標籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note warning simple %&#125;</span><br><span class="line">warning 提示塊標籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note danger simple %&#125;</span><br><span class="line">danger 提示塊標籤</span><br><span class="line">&#123;% endnote %&#125;</span><br></pre></td></tr></table></figure><div class="note simple"><p>默認 提示塊標籤</p></div><div class="note default simple"><p>default 提示塊標籤</p></div><div class="note primary simple"><p>primary 提示塊標籤</p></div><div class="note success simple"><p>success 提示塊標籤</p></div><div class="note info simple"><p>info 提示塊標籤</p></div><div class="note warning simple"><p>warning 提示塊標籤</p></div><div class="note danger simple"><p>danger 提示塊標籤</p></div><h3 id="modern类型"><a href="#modern类型" class="headerlink" title="modern类型"></a>modern类型</h3><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% note modern %&#125;</span><br><span class="line">默认 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note default modern %&#125;</span><br><span class="line">default 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note primary modern %&#125;</span><br><span class="line">primary 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note success modern %&#125;</span><br><span class="line">success 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note info modern %&#125;</span><br><span class="line">info 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note warning modern %&#125;</span><br><span class="line">warning 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note danger modern %&#125;</span><br><span class="line">danger 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br></pre></td></tr></table></figure><div class="note modern"><p>默认 提示块标籤</p></div><div class="note default modern"><p>default 提示块标籤</p></div><div class="note primary modern"><p>primary 提示块标籤</p></div><div class="note success modern"><p>success 提示块标籤</p></div><div class="note info modern"><p>info 提示块标籤</p></div><div class="note warning modern"><p>warning 提示块标籤</p></div><div class="note danger modern"><p>danger 提示块标籤</p></div><h3 id="flat类型"><a href="#flat类型" class="headerlink" title="flat类型"></a>flat类型</h3><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% note flat %&#125;</span><br><span class="line">默认 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note default flat %&#125;</span><br><span class="line">default 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note primary flat %&#125;</span><br><span class="line">primary 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note success flat %&#125;</span><br><span class="line">success 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note info flat %&#125;</span><br><span class="line">info 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note warning flat %&#125;</span><br><span class="line">warning 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note danger flat %&#125;</span><br><span class="line">danger 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure><div class="note flat"><p>默认 提示块标籤</p></div><div class="note default flat"><p>default 提示块标籤</p></div><div class="note primary flat"><p>primary 提示块标籤</p></div><div class="note success flat"><p>success 提示块标籤</p></div><div class="note info flat"><p>info 提示块标籤</p></div><div class="note warning flat"><p>warning 提示块标籤</p></div><div class="note danger flat"><p>danger 提示块标籤</p></div><h3 id="no-icon无图标类型"><a href="#no-icon无图标类型" class="headerlink" title="no-icon无图标类型"></a>no-icon无图标类型</h3><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% note no-icon %&#125;</span><br><span class="line">默认 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note default no-icon %&#125;</span><br><span class="line">default 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note primary no-icon %&#125;</span><br><span class="line">primary 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note success no-icon %&#125;</span><br><span class="line">success 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note info no-icon %&#125;</span><br><span class="line">info 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note warning no-icon %&#125;</span><br><span class="line">warning 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br><span class="line">&#123;% note danger no-icon %&#125;</span><br><span class="line">danger 提示块标籤</span><br><span class="line">&#123;% endnote %&#125;</span><br></pre></td></tr></table></figure><div class="note no-icon flat"><p>默认 提示块标籤</p></div><div class="note default no-icon flat"><p>default 提示块标籤</p></div><div class="note primary no-icon flat"><p>primary 提示块标籤</p></div><div class="note success no-icon flat"><p>success 提示块标籤</p></div><div class="note info no-icon flat"><p>info 提示块标籤</p></div><div class="note warning no-icon flat"><p>warning 提示块标籤</p></div><div class="note danger no-icon flat"><p>danger 提示块标籤</p></div><h3 id="自定义图标颜色类型"><a href="#自定义图标颜色类型" class="headerlink" title="自定义图标颜色类型"></a>自定义图标颜色类型</h3><p>1.配置:颜色（color）+图标（icon）+类型（style）</p><ul><li>simple （和上面类型差不多，只展示一个）</li><li>只支持 fontawesome 图标</li></ul><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% note &#x27;fab fa-cc-visa&#x27; simple %&#125;</span><br><span class="line">你是刷 Visa 还是 UnionPay</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line">&#123;% note blue &#x27;fas fa-bullhorn&#x27; simple %&#125;</span><br><span class="line">2021年快到了....</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line">&#123;% note pink &#x27;fas fa-car-crash&#x27; simple %&#125;</span><br><span class="line">小心开车 安全至上</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line">&#123;% note red &#x27;fas fa-fan&#x27; simple%&#125;</span><br><span class="line">这是三片呢？还是四片？</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line">&#123;% note orange &#x27;fas fa-battery-half&#x27; simple %&#125;</span><br><span class="line">你是刷 Visa 还是 UnionPay</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line">&#123;% note purple &#x27;far fa-hand-scissors&#x27; simple %&#125;</span><br><span class="line">剪刀石头布</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line">&#123;% note green &#x27;fab fa-internet-explorer&#x27; simple %&#125;</span><br><span class="line">前端最讨厌的浏览器</span><br><span class="line">&#123;% endnote %&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure><div class="note icon-padding simple"><i class="note-icon fab fa-cc-visa"></i><p>你是刷 Visa 还是 UnionPay</p></div><div class="note blue icon-padding simple"><i class="note-icon fas fa-bullhorn"></i><p>2021年快到了….</p></div><div class="note pink icon-padding simple"><i class="note-icon fas fa-car-crash"></i><p>小心开车 安全至上</p></div><div class="note red icon-padding simple"><i class="note-icon fas fa-fan"></i><p>这是三片呢？还是四片？</p></div><div class="note orange icon-padding simple"><i class="note-icon fas fa-battery-half"></i><p>你是刷 Visa 还是 UnionPay</p></div><div class="note purple icon-padding simple"><i class="note-icon far fa-hand-scissors"></i><p>剪刀石头布</p></div><div class="note green icon-padding simple"><i class="note-icon fab fa-internet-explorer"></i><p>前端最讨厌的浏览器</p></div><h2 id="标签隐藏美化"><a href="#标签隐藏美化" class="headerlink" title="标签隐藏美化"></a>标签隐藏美化</h2><h3 id="block"><a href="#block" class="headerlink" title="block"></a>block</h3><p>block独立的block隐藏内容，可以隐藏很多内容，包括图片，代码块等等</p><p>( display 不能包含英文逗号，可用&sbquo;)</p><ul><li>content: 文本内容</li><li>display: 按钮显示的文字(可选)</li><li>bg: 按钮的背景颜色(可选)</li><li>color: 按钮文字的颜色(可选)</li></ul><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% hideBlock display,bg,color %&#125;</span><br><span class="line">内容</span><br><span class="line">&#123;% endhideBlock %&#125;</span><br></pre></td></tr></table></figure><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% hideBlock 查看答案 %&#125;</span><br><span class="line">傻子，怎么可能有答案</span><br><span class="line">&#123;% endhideBlock %&#125;</span><br></pre></td></tr></table></figure><div class="hide-block"><button type="button" class="hide-button" style="">查看答案    </button><div class="hide-content"><p>傻子，怎么可能有答案</p></div></div><h3 id="Button"><a href="#Button" class="headerlink" title="Button"></a>Button</h3><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% btn [url],[text],[icon],[color] [style] [layout] [position] [size] %&#125;</span><br><span class="line"></span><br><span class="line">[url]         : 链接</span><br><span class="line">[text]        : 按钮文字</span><br><span class="line">[icon]        : [可选] 图标</span><br><span class="line">[color]       : [可选] 按钮背景顔色(默认style时）</span><br><span class="line"><span class="code">                      按钮字体和边框顔色(outline时)</span></span><br><span class="line"><span class="code">                      default/blue/pink/red/purple/orange/green</span></span><br><span class="line"><span class="code">[style]       : [可选] 按钮样式 默认实心</span></span><br><span class="line"><span class="code">                      outline/留空</span></span><br><span class="line"><span class="code">[layout]      : [可选] 按钮佈局 默认为line</span></span><br><span class="line"><span class="code">                      block/留空</span></span><br><span class="line"><span class="code">[position]    : [可选] 按钮位置 前提是设置了layout为block 默认为左边</span></span><br><span class="line"><span class="code">                      center/right/留空</span></span><br><span class="line"><span class="code">[size]        : [可选] 按钮大小</span></span><br><span class="line"><span class="code">                      larger/留空</span></span><br></pre></td></tr></table></figure><h4 id="1-Demo"><a href="#1-Demo" class="headerlink" title="1.Demo"></a>1.Demo</h4><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">This is my website, click the button &#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly %&#125;</span><br><span class="line">This is my website, click the button &#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right %&#125;</span><br><span class="line">This is my website, click the button &#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,,outline %&#125;</span><br><span class="line">This is my website, click the button &#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,outline %&#125;</span><br><span class="line">This is my website, click the button &#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,larger %&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure><p>This is my website, click the button <a class="btn-anzhiyu " href="https://butterfly.js.org/"   title="Butterfly"><span>Butterfly</span></a><br>This is my website, click the button <a class="btn-anzhiyu " href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><br>This is my website, click the button <a class="btn-anzhiyu outline" href="https://butterfly.js.org/"   title="Butterfly"><span>Butterfly</span></a><br>This is my website, click the button <a class="btn-anzhiyu outline" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><br>This is my website, click the button <a class="btn-anzhiyu larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a></p><h4 id="2-带链接"><a href="#2-带链接" class="headerlink" title="2.带链接"></a>2.带链接</h4><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,block %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,block center larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,block right outline larger %&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure><a class="btn-anzhiyu block" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu block center larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu block right outline larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><h4 id="3-实心颜色"><a href="#3-实心颜色" class="headerlink" title="3.实心颜色"></a>3.实心颜色</h4><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,blue larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,pink larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,red larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,purple larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,orange larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,green larger %&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure><a class="btn-anzhiyu larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu blue larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu pink larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu red larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu purple larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu orange larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu green larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><h4 id="4-空心颜色"><a href="#4-空心颜色" class="headerlink" title="4.空心颜色"></a>4.空心颜色</h4><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;btn-center&quot;</span>&gt;</span></span></span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,outline larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,outline blue larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,outline pink larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,outline red larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,outline purple larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,outline orange larger %&#125;</span><br><span class="line">&#123;% btn &#x27;https://butterfly.js.org/&#x27;,Butterfly,far fa-hand-point-right,outline green larger %&#125;</span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line"></span><br></pre></td></tr></table></figure><div class="btn-center"><a class="btn-anzhiyu outline larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu outline blue larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu outline pink larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu outline red larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu outline purple larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu outline orange larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a><a class="btn-anzhiyu outline green larger" href="https://butterfly.js.org/"   title="Butterfly"><i class="far fa-hand-point-right"></i><span>Butterfly</span></a></div>### 文字彩色高亮<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% label text color %&#125;   text文字  color=想要的颜色</span><br></pre></td></tr></table></figure><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">臣亮言：&#123;% label 先帝 %&#125;创业未半，而&#123;% label 中道崩殂 blue %&#125;。今天下三分，&#123;% label 益州疲敝 pink %&#125;，此诚&#123;% label 危急存亡之秋 red %&#125;也！然侍衞之臣，不懈于内；&#123;% label 忠志之士 purple %&#125;，忘身于外者，盖追先帝之殊遇，欲报之于陛下也。诚宜开张圣听，以光先帝遗德，恢弘志士之气；不宜妄自菲薄，引喻失义，以塞忠谏之路也。</span><br><span class="line">宫中、府中，俱为一体；陟罚臧否，不宜异同。若有&#123;% label 作奸 orange %&#125;、&#123;% label 犯科 green %&#125;，及为忠善者，宜付有司，论其刑赏，以昭陛下平明之治；不宜偏私，使内外异法也。</span><br><span class="line"></span><br></pre></td></tr></table></figure><p>臣亮言：<mark class="hl-label default">先帝</mark> 创业未半，而<mark class="hl-label blue">中道崩殂</mark> 。今天下三分，<mark class="hl-label pink">益州疲敝</mark> ，此诚<mark class="hl-label red">危急存亡之秋</mark> 也！然侍衞之臣，不懈于内；<mark class="hl-label purple">忠志之士</mark> ，忘身于外者，盖追先帝之殊遇，欲报之于陛下也。诚宜开张圣听，以光先帝遗德，恢弘志士之气；不宜妄自菲薄，引喻失义，以塞忠谏之路也。<br>宫中、府中，俱为一体；陟罚臧否，不宜异同。若有<mark class="hl-label orange">作奸</mark> 、<mark class="hl-label green">犯科</mark> ，及为忠善者，宜付有司，论其刑赏，以昭陛下平明之治；不宜偏私，使内外异法也。</p><h3 id="时间线"><a href="#时间线" class="headerlink" title="时间线"></a>时间线</h3><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% timeline 2022,pink %&#125;</span><br><span class="line">&lt;!-- timeline 01-02 --&gt;</span><br><span class="line">这是测试页面</span><br><span class="line">&lt;!-- endtimeline --&gt;</span><br><span class="line">&#123;% endtimeline %&#125;</span><br><span class="line">例子为粉色，想要改其他颜色替换pink即可，blue pink red purple orange green 默认淡蓝色</span><br></pre></td></tr></table></figure><div class="timeline pink"><div class='timeline-item headline'><div class='timeline-item-title'><div class='item-circle'><p>2022</p></div></div></div><div class='timeline-item'><div class='timeline-item-title'><div class='item-circle'><p>01-02</p></div></div><div class='timeline-item-content'><p>这是测试页面</p></div></div></div><h3 id="toggle折叠式文章显示"><a href="#toggle折叠式文章显示" class="headerlink" title="toggle折叠式文章显示"></a>toggle折叠式文章显示</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;% hideToggle display,bg,color %&#125;</span><br><span class="line">content</span><br><span class="line">&#123;% endhideToggle %&#125;</span><br></pre></td></tr></table></figure><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% hideToggle Butterfly安装方法 %&#125;</span><br><span class="line">在你的博客根目录里</span><br><span class="line"></span><br><span class="line">git clone -b master https://github.com/jerryc127/hexo-theme-butterfly.git themes/Butterfly</span><br><span class="line"></span><br><span class="line">如果想要安装比较新的dev分支，可以</span><br><span class="line"></span><br><span class="line">git clone -b dev https://github.com/jerryc127/hexo-theme-butterfly.git themes/Butterfly</span><br><span class="line"></span><br><span class="line">&#123;% endhideToggle %&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure><details class="toggle" ><summary class="toggle-button" style="">Butterfly安装方法</summary><div class="toggle-content"><p>在你的博客根目录里</p><p>git clone -b master <a href="https://github.com/jerryc127/hexo-theme-butterfly.git">https://github.com/jerryc127/hexo-theme-butterfly.git</a> themes&#x2F;Butterfly</p><p>如果想要安装比较新的dev分支，可以</p><p>git clone -b dev <a href="https://github.com/jerryc127/hexo-theme-butterfly.git">https://github.com/jerryc127/hexo-theme-butterfly.git</a> themes&#x2F;Butterfly</p></div></details><h3 id="标签显示"><a href="#标签显示" class="headerlink" title="标签显示"></a>标签显示</h3><h4 id="非预设标签（默认展示第一项）"><a href="#非预设标签（默认展示第一项）" class="headerlink" title="非预设标签（默认展示第一项）"></a>非预设标签（默认展示第一项）</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;% tabs test1 %&#125;</span><br><span class="line">&lt;!-- tab --&gt;</span><br><span class="line">**This is Tab 1.**</span><br><span class="line">&lt;!-- endtab --&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- tab --&gt;</span><br><span class="line">**This is Tab 2.**</span><br><span class="line">&lt;!-- endtab --&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- tab --&gt;</span><br><span class="line">**This is Tab 3.**</span><br><span class="line">&lt;!-- endtab --&gt;</span><br><span class="line">&#123;% endtabs %&#125;</span><br></pre></td></tr></table></figure><div class="tabs" id="test1"><ul class="nav-tabs"><button type="button" class="tab  active" data-href="test1-1">test1 1</button><button type="button" class="tab " data-href="test1-2">test1 2</button><button type="button" class="tab " data-href="test1-3">test1 3</button></ul><div class="tab-contents"><div class="tab-item-content active" id="test1-1"><p><strong>This is Tab 1.</strong></p></div><div class="tab-item-content" id="test1-2"><p><strong>This is Tab 2.</strong></p></div><div class="tab-item-content" id="test1-3"><p><strong>This is Tab 3.</strong></p></div></div><div class="tab-to-top"><button type="button" aria-label="scroll to top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><h4 id="预设标签-如下默认勾选第三个"><a href="#预设标签-如下默认勾选第三个" class="headerlink" title="预设标签(如下默认勾选第三个)"></a>预设标签(如下默认勾选第三个)</h4><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% tabs test2, 3 %&#125;</span><br><span class="line">&lt;!-- tab --&gt;</span><br><span class="line"><span class="strong">**This is Tab 1.**</span></span><br><span class="line">&lt;!-- endtab --&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- tab --&gt;</span><br><span class="line"><span class="strong">**This is Tab 2.**</span></span><br><span class="line">&lt;!-- endtab --&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- tab --&gt;</span><br><span class="line"><span class="strong">**This is Tab 3.**</span></span><br><span class="line">&lt;!-- endtab --&gt;</span><br><span class="line">&#123;% endtabs %&#125;</span><br></pre></td></tr></table></figure><div class="tabs" id="test2"><ul class="nav-tabs"><button type="button" class="tab " data-href="test2-1">test2 1</button><button type="button" class="tab " data-href="test2-2">test2 2</button><button type="button" class="tab  active" data-href="test2-3">test2 3</button></ul><div class="tab-contents"><div class="tab-item-content" id="test2-1"><p><strong>This is Tab 1.</strong></p></div><div class="tab-item-content" id="test2-2"><p><strong>This is Tab 2.</strong></p></div><div class="tab-item-content active" id="test2-3"><p><strong>This is Tab 3.</strong></p></div></div><div class="tab-to-top"><button type="button" aria-label="scroll to top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><h4 id="自定义Tab名-只有icon-icon和Tab名"><a href="#自定义Tab名-只有icon-icon和Tab名" class="headerlink" title="自定义Tab名 + 只有icon + icon和Tab名"></a>自定义Tab名 + 只有icon + icon和Tab名</h4><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% tabs test4 %&#125;</span><br><span class="line">&lt;!-- tab 第一个Tab --&gt;</span><br><span class="line"><span class="strong">**tab名字为第一个Tab**</span></span><br><span class="line">&lt;!-- endtab --&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- tab @fab fa-apple-pay --&gt;</span><br><span class="line"><span class="strong">**只有图标 没有Tab名字**</span></span><br><span class="line">&lt;!-- endtab --&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- tab 炸弹@fas fa-bomb --&gt;</span><br><span class="line"><span class="strong">**名字+icon**</span></span><br><span class="line">&lt;!-- endtab --&gt;</span><br><span class="line">&#123;% endtabs %&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure><div class="tabs" id="test4"><ul class="nav-tabs"><button type="button" class="tab  active" data-href="test4-1">第一个Tab</button><button type="button" class="tab " data-href="test4-2"><i class="fab fa-apple-pay" style="text-align: center;"></i></button><button type="button" class="tab " data-href="test4-3"><i class="fas fa-bomb"></i>炸弹</button></ul><div class="tab-contents"><div class="tab-item-content active" id="test4-1"><p><strong>tab名字为第一个Tab</strong></p></div><div class="tab-item-content" id="test4-2"><p><strong>只有图标 没有Tab名字</strong></p></div><div class="tab-item-content" id="test4-3"><p><strong>名字+icon</strong></p></div></div><div class="tab-to-top"><button type="button" aria-label="scroll to top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><h3 id="相册和相册图集配置"><a href="#相册和相册图集配置" class="headerlink" title="相册和相册图集配置"></a>相册和相册图集配置</h3><h4 id="相册"><a href="#相册" class="headerlink" title="相册"></a>相册</h4><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% gallery %&#125;</span><br><span class="line">markdown 图片格式</span><br><span class="line">&#123;% endgallery %&#125;</span><br></pre></td></tr></table></figure><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% gallery %&#125;</span><br><span class="line">![](<span class="link">https://i.loli.net/2019/12/25/Fze9jchtnyJXMHN.jpg</span>)</span><br><span class="line">![](<span class="link">https://i.loli.net/2019/12/25/ryLVePaqkYm4TEK.jpg</span>)</span><br><span class="line">![](<span class="link">https://i.loli.net/2019/12/25/gEy5Zc1Ai6VuO4N.jpg</span>)</span><br><span class="line">![](<span class="link">https://i.loli.net/2019/12/25/d6QHbytlSYO4FBG.jpg</span>)</span><br><span class="line">![](<span class="link">https://i.loli.net/2019/12/25/6nepIJ1xTgufatZ.jpg</span>)</span><br><span class="line">![](<span class="link">https://i.loli.net/2019/12/25/E7Jvr4eIPwUNmzq.jpg</span>)</span><br><span class="line">![](<span class="link">https://i.loli.net/2019/12/25/mh19anwBSWIkGlH.jpg</span>)</span><br><span class="line">![](<span class="link">https://i.loli.net/2019/12/25/2tu9JC8ewpBFagv.jpg</span>)</span><br><span class="line">&#123;% endgallery %&#125;</span><br></pre></td></tr></table></figure><div class="gallery">  <div class="fj-gallery page_img_lazyload  data" data-rowHeight="220" data-limit="10">    <span class="gallery-data">[{"url":"https://i.loli.net/2019/12/25/Fze9jchtnyJXMHN.jpg","alt":""},{"url":"https://i.loli.net/2019/12/25/ryLVePaqkYm4TEK.jpg","alt":""},{"url":"https://i.loli.net/2019/12/25/gEy5Zc1Ai6VuO4N.jpg","alt":""},{"url":"https://i.loli.net/2019/12/25/d6QHbytlSYO4FBG.jpg","alt":""},{"url":"https://i.loli.net/2019/12/25/6nepIJ1xTgufatZ.jpg","alt":""},{"url":"https://i.loli.net/2019/12/25/E7Jvr4eIPwUNmzq.jpg","alt":""},{"url":"https://i.loli.net/2019/12/25/mh19anwBSWIkGlH.jpg","alt":""},{"url":"https://i.loli.net/2019/12/25/2tu9JC8ewpBFagv.jpg","alt":""}]</span>  </div><button class="gallery-load-more" style="opacity:0">  <span>加载更多</span>  <i class="anzhiyufont anzhiyu-icon-arrow-down"></i>  </button></div><h4 id="相册图集"><a href="#相册图集" class="headerlink" title="相册图集"></a>相册图集</h4><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;gallery-group-main&quot;</span>&gt;</span></span></span><br><span class="line">&#123;% galleryGroup name description link img-url %&#125;</span><br><span class="line">&#123;% galleryGroup name description link img-url %&#125;</span><br><span class="line">&#123;% galleryGroup name description link img-url %&#125;</span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br></pre></td></tr></table></figure><ul><li>name：图库名字<ul><li>description：图库描述<ul><li>link：连接到对应相册的地址<ul><li>img-url：图库封面的地址</li></ul></li></ul></li></ul></li></ul><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;gallery-group-main&quot;</span>&gt;</span></span></span><br><span class="line">&#123;% galleryGroup &#x27;壁纸&#x27; &#x27;收藏的一些壁纸&#x27; &#x27;/Gallery/wallpaper&#x27; https://i.loli.net/2019/11/10/T7Mu8Aod3egmC4Q.png %&#125;</span><br><span class="line">&#123;% galleryGroup &#x27;漫威&#x27; &#x27;关于漫威的图片&#x27; &#x27;/Gallery/marvel&#x27; https://i.loli.net/2019/12/25/8t97aVlp4hgyBGu.jpg %&#125;</span><br><span class="line">&#123;% galleryGroup &#x27;OH MY GIRL&#x27; &#x27;关于OH MY GIRL的图片&#x27; &#x27;/Gallery/ohmygirl&#x27; https://i.loli.net/2019/12/25/hOqbQ3BIwa6KWpo.jpg %&#125;</span><br><span class="line"><span class="language-xml"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br></pre></td></tr></table></figure><div class="gallery-group-main">  <figure class="gallery-group">  <img class="gallery-group-img no-lightbox" src='https://i.loli.net/2019/11/10/T7Mu8Aod3egmC4Q.png' alt="Group Image Gallery">  <figcaption>  <div class="gallery-group-name">壁纸</div>  <p>收藏的一些壁纸</p>  <a href='/Gallery/wallpaper'></a>  </figcaption>  </figure>    <figure class="gallery-group">  <img class="gallery-group-img no-lightbox" src='https://i.loli.net/2019/12/25/8t97aVlp4hgyBGu.jpg' alt="Group Image Gallery">  <figcaption>  <div class="gallery-group-name">漫威</div>  <p>关于漫威的图片</p>  <a href='/Gallery/marvel'></a>  </figcaption>  </figure>    <figure class="gallery-group">  <img class="gallery-group-img no-lightbox" src='https://i.loli.net/2019/12/25/hOqbQ3BIwa6KWpo.jpg' alt="Group Image Gallery">  <figcaption>  <div class="gallery-group-name">OH MY GIRL</div>  <p>关于OH MY GIRL的图片</p>  <a href='/Gallery/ohmygirl'></a>  </figcaption>  </figure>  </div>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 博客搭建 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>使用freedns也可轻松获取证书</title>
+      <link href="/archives/7126f402/"/>
+      <url>/archives/7126f402/</url>
+      
+        <content type="html"><![CDATA[<p>由于cloudflare不收此后缀的域名了，所以柠萌打算把域名挂到了freedns上，确实也蛮好用的，免费还自带301跳转，并且搭配软路由可以实时获取到公网ip的地址，可以说是相当的方便了。 😊<br>但是唯有让我头疼的就是https，连续搞了几个小时配置dns验证都没有折腾好，每次失败后都要等待一个小时之久，当我正准备放弃的时候，我却突然成功了，这让我欣喜诺狂，记录一下我成功的过程 😋<br><img src="https://s2.loli.net/2022/02/15/F7g3DEVOiatSRZc.png" alt="成功图1"><br>主要的关键在于<strong>Subdomain</strong>在dns验证时这里只需要添加_acme-challenge即可不需要加域名后缀，它会自动添加否则会导致重复。其次是<strong>Destination</strong>这里，在添加验证值时需要在两侧加上(“”)号才可成功。这块一直没有发现所以导致多次失败。蛮有毒的说。<br>如果你使用的是宝塔面板即可使用dns验证即可快速下发证书，甚至到期会主动自动签名，蛮好用的说。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 域名解析 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>今日记事</title>
+      <link href="/archives/26e8b5d3/"/>
+      <url>/archives/26e8b5d3/</url>
+      
+        <content type="html"><![CDATA[<h1 id="夏天真的是好热啊"><a href="#夏天真的是好热啊" class="headerlink" title="夏天真的是好热啊"></a>夏天真的是好热啊</h1><p><strong>假期独自宅在家中刷手机看动漫的感觉确实舒服，诶嘿 ( •̀ ω •́ )✧</strong><br>为了不让我的体重继续直线上涨，今天早上还是下定决心出门锻炼了，本来打算早点起床来着，看了一眼手表7点了（已经开始放晴了，呜呜呜），赶紧起床洗漱后出门。貌似早上好几天没出门了啊，在家中本想打算骑车去公园玩来着，从小区大门一出，炎热的太阳灼烧着我娇嫩的皮肤（ 嘛，算了算了）在小区里锻炼吧。 😋<br>就这样我围着小区小跑转了一圈又一圈，小区的老年人起来的都蛮早的，有的3点就能起床，俺真就做不到了，毕竟晚上睡觉晚一些。亭子旁边的老大爷一会看我一眼，贼社死，身上开始微微出汗了，好啦可以休息啦。</p><h1 id="准备买冷饮啦"><a href="#准备买冷饮啦" class="headerlink" title="准备买冷饮啦"></a>准备买冷饮啦</h1><p>把新鲜的雪丸子放到嘴里， (～￣▽￣)～瞬间仿佛回到了冬天（好舒服~） )<br><img src="https://s2.loli.net/2022/02/15/f6ot2k5bMeEzxcB.jpg" alt="图片2"></p><p>屏蔽学习微信群消息，打开网抑云戴上耳机。回到家中接着学python  o(<em>￣▽￣</em>)o，放假一人自由的生活可真是太舒服啦（对于社交恐惧的我在这一刻得到救赎了  ）</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 闲聊吹水 </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>伤害不高，侮辱性极强</title>
+      <link href="/archives/edcb4e27/"/>
+      <url>/archives/edcb4e27/</url>
+      
+        <content type="html"><![CDATA[<p>企查查 App 显示，法院认为，小米公司向范某推送广告的行为未损害有关权力，且原告可更改设置避免广告干扰，但小米公司广告链接提供点击即下载服务，未事先取得原告下载许可，侵害了原告的知情权。判决结果为，小米公司赔偿范某 1 元。</p><p><img src="https://s2.loli.net/2022/02/15/sY1icb8LrFECkK5.jpg" alt="10458a0ebda8915d.jpg"></p><p><img src="https://s2.loli.net/2022/02/15/cz4YWNbDCA2Jon7.png" alt="Screenshot_20210909-125305.png"></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 原创 </category>
+          
+          <category> 闲聊吹水 </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>柠萌云盘站搬运公告</title>
+      <link href="/archives/500551f5/"/>
+      <url>/archives/500551f5/</url>
+      
+        <content type="html"><![CDATA[<h1 id="本站正进行构建基础测试-2023-5-14"><a href="#本站正进行构建基础测试-2023-5-14" class="headerlink" title="本站正进行构建基础测试 2023.5.14"></a>本站正进行构建基础测试 2023.5.14</h1><h2 id="关于酷安可能暂停搬运通知"><a href="#关于酷安可能暂停搬运通知" class="headerlink" title="关于酷安可能暂停搬运通知"></a>关于酷安可能暂停搬运通知</h2><h3 id="1-前言"><a href="#1-前言" class="headerlink" title="1.前言:"></a>1.前言:</h3><p>真的我是没想到，本着为大家考虑，柠萌觉得比较好的内容都会搬运到盘站内来给大家分享，也省着去浪费时间去找，也不需要科学上网，这也是我今年可能在酷安内发的第一篇长文，我是越来越厌烦酷安的审核机制，很多内容几乎是写在博客内通过转载发送到酷安内。<br><img src="https://s2.loli.net/2021/12/29/KoA5vmWECYaDM4G.jpg" style="zoom: 50%;" /><br><img src="https://s2.loli.net/2021/12/29/NlzwGFRBiZrLMhD.jpg" style="zoom:50%;" /><br>当我看到这张图片的时候，先是惊讶，我没想到让大家白嫖也会被举报，后来内心很是难过，感谢qq内和电报内的好友来安慰我，让我能好受一些了，费力不讨好让柠萌觉得<strong>只是在浪费自己的时间，而别人根本就不会领情</strong>，这次事件已经对酷安彻底感到心寒。。。。😭</p><h2 id="初衷，"><a href="#初衷，" class="headerlink" title="初衷，"></a>初衷，</h2><p>只是想方便自己的同时方便大家，所以柠萌才会无私的做这些😊</p><h2 id="最后，"><a href="#最后，" class="headerlink" title="最后，"></a>最后，</h2><p>欢迎大家加入群聊，群内会及时推送盘站搬运内容，同时欢迎大家，类原生心得分享，游戏闲聊吹水，模块分享以及盘站密码获取欢迎您的到来鸭 😋</p><div class="note info flat"><p>小要求：请保持群内活跃，定期送飞机票。特别基础小白问题不予答复，做不到这两点请勿进群，以免被清理后直接拉黑。</p></div><img src="https://s2.loli.net/2021/12/29/xzUrK4NFHIPEy1c.jpg" style="zoom:50%;" /><h2 id="云盘站公告"><a href="#云盘站公告" class="headerlink" title="云盘站公告"></a>云盘站公告</h2><p><strong>2021.12.29日，由于之前盘站被它人恶意爬取并且没有得到本人同意。云盘站文件将开始陆续加密，详细信息可在云盘站首页查看，盘站内容一直保持更新状态，详细可在群聊内及时获取。</strong><br>资源全部汇总 盘站已全部维护完毕</p><h2 id="柠萌云盘站维护日志"><a href="#柠萌云盘站维护日志" class="headerlink" title="柠萌云盘站维护日志"></a>柠萌云盘站维护日志</h2><p><strong><del>目前由于经济问题盘站稳定性稍差可能会突然服务器暴毙，需要定期人工干预排查，所以出现无法访问时莫慌可，稍等待片刻即可恢复正常</del></strong></p><div class="timeline pink"><div class='timeline-item headline'><div class='timeline-item-title'><div class='item-circle'><p>2022</p></div></div></div><div class='timeline-item'><div class='timeline-item-title'><div class='item-circle'><p>02-20</p></div></div><div class='timeline-item-content'><p>柠萌云盘站重新构建，更换云盘程序，和上一版本相比已大幅度增加盘站稳定性。崩溃问题基本得以解决，并且加回https，更换新域名，站点已使用新服务器构建。</p></div></div></div><div class="timeline pink"><div class='timeline-item headline'><div class='timeline-item-title'><div class='item-circle'><p>2021</p></div></div></div><div class='timeline-item'><div class='timeline-item-title'><div class='item-circle'><p>11-21</p></div></div><div class='timeline-item-content'><p>云盘站已取消https,原因影响ml访问目前暂时无法排除到原因已关闭。如果打不开站点请清除本站浏览器访问数</p></div></div><div class='timeline-item'><div class='timeline-item-title'><div class='item-circle'><p>11-10</p></div></div><div class='timeline-item-content'><p>新增盘站自动化部署，可实现点对点自动化推送</p></div></div><div class='timeline-item'><div class='timeline-item-title'><div class='item-circle'><p>11-03</p></div></div><div class='timeline-item-content'><p>添加云盘站全站https增加安全性</p></div></div><div class='timeline-item'><div class='timeline-item-title'><div class='item-circle'><p>11-01</p></div></div><div class='timeline-item-content'><p>重建盘站程序，修复突然空白问题，新增盘站logo</p></div></div><div class='timeline-item'><div class='timeline-item-title'><div class='item-circle'><p>10-31</p></div></div><div class='timeline-item-content'><p>柠萌云盘站修复下载速度问题添加全站cdn</p></div></div></div><h2 id="关于博客访问问题-2022-2-07"><a href="#关于博客访问问题-2022-2-07" class="headerlink" title="关于博客访问问题 2022&#x2F;2&#x2F;07"></a><del>关于博客访问问题 2022&#x2F;2&#x2F;07</del></h2><h2 id="站点已迁移为www-lemonbuluo-top"><a href="#站点已迁移为www-lemonbuluo-top" class="headerlink" title="站点已迁移为www.lemonbuluo.top"></a>站点已迁移为<a href="http://www.lemonbuluo.top/">www.lemonbuluo.top</a></h2><div class="note warning flat"><p><del>目前主站证书挂掉可能打开页面会有安全提示，正在准备搬移站点，请无视弹出的警告。</del> </p></div><h2 id="云盘站内容汇总"><a href="#云盘站内容汇总" class="headerlink" title="云盘站内容汇总"></a>云盘站内容汇总</h2><p>由于盘站服务器跑路，盘站由自己托管。稳定性可能会下降。链接一时间无法全部补上所以柠萌准备了汇总。<br>红米Note9Pro 红米Note5 红米Note4X<br>由于柠萌最近红米n4x备用机到手，新增搬运红米note4x<br>红米note4x全部文件及刷机包<br><a href="https://pan.lemonbuluo.top/%E6%90%9E%E6%9C%BA%E8%B5%84%E6%BA%90%E5%A4%A7%E5%85%A8(%E6%A8%A1%E5%9D%97....%E5%88%B7%E6%9C%BA%E6%96%87%E4%BB%B6%EF%BC%89/%E5%90%84%E7%A7%8D%E6%9C%BA%E5%9E%8B%E5%88%B7%E6%9C%BA%E5%8C%85%E5%8F%8A%E5%85%B6%E9%99%84%E5%B1%9E%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD/%E7%BA%A2%E7%B1%B3note4x">点我即可鸭</a><br>红米note5全部文件及刷机包 （陆续更新）<br><a href="https://pan.lemonbuluo.top/%E6%90%9E%E6%9C%BA%E8%B5%84%E6%BA%90%E5%A4%A7%E5%85%A8(%E6%A8%A1%E5%9D%97....%E5%88%B7%E6%9C%BA%E6%96%87%E4%BB%B6%EF%BC%89/%E5%90%84%E7%A7%8D%E6%9C%BA%E5%9E%8B%E5%88%B7%E6%9C%BA%E5%8C%85%E5%8F%8A%E5%85%B6%E9%99%84%E5%B1%9E%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD/%E7%BA%A2%E7%B1%B3note5%E6%96%87%E4%BB%B6%E5%A4%B9">点我即可鸭</a><br>红米note9pro部分类原生刷机包(陆续更新)<br><a href="https://pan.lemonbuluo.top/%E6%90%9E%E6%9C%BA%E8%B5%84%E6%BA%90%E5%A4%A7%E5%85%A8(%E6%A8%A1%E5%9D%97....%E5%88%B7%E6%9C%BA%E6%96%87%E4%BB%B6%EF%BC%89/%E5%90%84%E7%A7%8D%E6%9C%BA%E5%9E%8B%E5%88%B7%E6%9C%BA%E5%8C%85%E5%8F%8A%E5%85%B6%E9%99%84%E5%B1%9E%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD/%E7%BA%A2%E7%B1%B3note9Pro">点我直连</a><br>其他机型少部分刷机包及rec<br><a href="https://pan.lemonbuluo.top/%E6%90%9E%E6%9C%BA%E8%B5%84%E6%BA%90%E5%A4%A7%E5%85%A8(%E6%A8%A1%E5%9D%97....%E5%88%B7%E6%9C%BA%E6%96%87%E4%BB%B6%EF%BC%89/%E5%90%84%E7%A7%8D%E6%9C%BA%E5%9E%8B%E5%88%B7%E6%9C%BA%E5%8C%85%E5%8F%8A%E5%85%B6%E9%99%84%E5%B1%9E%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD">点我直连获取</a><br>magisk模块以及一加桌面部分汇总<br><a href="https://pan.lemonbuluo.top/%E6%90%9E%E6%9C%BA%E8%B5%84%E6%BA%90%E5%A4%A7%E5%85%A8(%E6%A8%A1%E5%9D%97....%E5%88%B7%E6%9C%BA%E6%96%87%E4%BB%B6%EF%BC%89/magisk%E6%A8%A1%E5%9D%97">点我直连鸭</a><br>少部分动漫番剧（更新中）<br><a href="https://pan.lemonbuluo.top/%E6%9F%A0%E8%90%8C%E3%81%AE%E5%8A%A8%E6%BC%AB%E8%BF%BD%E7%95%AA%E5%B0%8F%E9%93%BA(%E2%91%85%CB%83%E2%97%A1%CB%82%E2%91%85)">点我直连获取</a><br>精选免费软件<br><a href="https://pan.lemonbuluo.top/%E7%B2%BE%E9%80%89%E5%AE%9E%E7%94%A8%E8%BD%AF%E4%BB%B6">点我直连鸭</a><br>柠萌云盘站总站<br><a href="https://pan.lemonbuluo.top/">https://pan.lemonbuluo.top</a><br><del>ps：免留用户可能导致网站稳定性不佳，可先关闭后浏览网页，下载时在开启即可。或者将本站加入白名单😊</del></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 网盘公告 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 公告 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>类原生安卓12美化记录篇(轻度修改)</title>
+      <link href="/archives/601b2243/"/>
+      <url>/archives/601b2243/</url>
+      
+        <content type="html"><![CDATA[<h2 id="对于安卓12的感想"><a href="#对于安卓12的感想" class="headerlink" title="对于安卓12的感想"></a>对于安卓12的感想</h2><p>在写这篇文章的时候，柠萌已经在安卓12大约快一周了各方面体验相当不错，只是稍有bug。不影响使用，体验下来其实最让我喜欢的时更换壁纸时全局主题会跟随壁纸的颜色进行变化。看起来整体性极强，增加了很多桌面小插件，以及桌面图标主题色都让系统变得好看不少。可以说是安卓类原生的大变革。但是刚从其他系统过来的小伙伴可能还不会美化，所以我给大家出了一期美化教程，还请大家继续往下看鸭 o(<em>￣▽￣</em>)o</p><h2 id="美化桌面"><a href="#美化桌面" class="headerlink" title="美化桌面"></a>美化桌面</h2><p>柠萌将使用pixel experience系统作为演示，其他类原生可能有所差异仅作参考记录<br>当使用了pixel自带的桌面启动器，并打开使用桌面主题强调色（带主题的图标）时<br><img src="https://s2.loli.net/2022/02/18/MWv8nw2hOzpFLeK.jpg" style="zoom: 50%;" /><br><img src="https://s2.loli.net/2022/02/18/7IOrvE3pPk4qaxB.jpg" style="zoom: 50%;" /><br>桌面确实跟随壁纸变了颜色，虽然这个设计柠萌很喜欢，但是只变了系统自带软件的图标，而其他软件图标却没有发生变化，形成了鲜明的对比，强迫症的柠萌属实逼疯。 😭</p><p>柠萌在多次查找中找到了完美适配大部分app主题强调色的方法<br>可以使用lawnchair桌面来替代pixel桌面<br>柠萌已将适配安卓12的启动器搬运到盘站中,其中包括feed，如果你使用Google负一屏需要安装<br><a href="https://ningmengs-my.sharepoint.com/:f:/g/personal/lemonyds_ningmengs_onmicrosoft_com/Enqr2wEzB0NHuDihtOgcsMQBEg-p5Uffq1ZFEUVlCt5f6w?e=C8qSZF">点我即可前往获取(≧▽≦)</a><br><strong>获取密码：</strong></p><span class="hide-inline"><button type="button" class="hide-button" style="background-color: #FF7242;color: #fff">点我获取诶  </button><span class="hide-content">ghvcx</span></span><p>并且安装<a href="https://www.coolapk.com/apk/app.lawnchair.lawnicons">cayicons</a>App<br><img src="https://s2.loli.net/2022/02/18/2UOA5bHrVifxNWd.jpg" style="zoom: 50%;" /><br>在主屏幕设置中打开此选项后即可体验啦 ::quyin:witty::<br>将软件拖动桌面即可呈现效果<br><img src="https://s2.loli.net/2022/02/18/2xpRCGHdUYXhZz3.jpg" style="zoom: 50%;" /></p><h2 id="推荐图标包"><a href="#推荐图标包" class="headerlink" title="推荐图标包"></a>推荐图标包</h2><img src="https://s2.loli.net/2022/02/18/4hpXKZxPGQ9RwIO.jpg" style="zoom: 50%;" />比如这个MBE style是柠萌相当喜欢的图标包，从安卓7到现在一直都在用 ::quyin:maimeng:: 很可爱的图标[获取地址点我鸭][4]<h2 id="桌面插件"><a href="#桌面插件" class="headerlink" title="桌面插件"></a>桌面插件</h2><img src="https://s2.loli.net/2022/02/18/OlDz5P28AtfSNUh.jpg" style="zoom: 50%;" />安卓12最大的更新就是桌面插件多样化，可以添加很多各式各样的图标插件，如果你的插件很少请前往Google play商店更新软件，并Googleapp申请beta测试人员即可<img src="https://s2.loli.net/2022/02/18/LSWVkUmiPZMza1v.jpg" style="zoom: 50%;" /><h2 id="更新建议"><a href="#更新建议" class="headerlink" title="更新建议"></a>更新建议</h2><p>如果您刚刷入了PE或者其他系统，请先去play商店检查软件更新，将软件更新到最新版，这样即可完整使用壁纸主题全局适配的功能。 </p><h2 id="其他美化"><a href="#其他美化" class="headerlink" title="其他美化"></a>其他美化</h2><p><strong>基于安卓12的桌面美化就到这里啦，其他美化可按照之前的美化内容即可，安卓11可直接看这篇<a href="https://lemonbuluo.tk:2233/archives/40/">点我直接跳转鸭</a>之前写的文章可作为参考</strong></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 搞机折腾 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>软件分享篇之：酷安去广告旧版本分享</title>
+      <link href="/archives/276dafca/"/>
+      <url>/archives/276dafca/</url>
+      
+        <content type="html"><![CDATA[<h2 id="出这篇博文的原由"><a href="#出这篇博文的原由" class="headerlink" title="出这篇博文的原由"></a>出这篇博文的原由</h2><blockquote><p>酷安说实话之前是我蛮喜欢的的平台，有很多大神搞机，又有很多教程。在里面交流相当快乐，也没有现在的弱智审查，软件用起来相当舒服。酷安自从有了名声后，软件体验直线下滑，进去首页的不是搞机的内容而是一堆无关话题和推销广告，（赚钱嘛，不寒蝉），李跳跳事件让我彻底对酷安失去好感。 </p></blockquote><img src="https://s2.loli.net/2022/02/18/b37aITiw5fYDeh4.jpg" style="zoom:50%;" /><p>说到广告这里真的是十分头疼，开屏广告，首页穿插着各种广告相当影响使用体验，酷友们应该是深有体会，无缘无故就会点到广告下载软件。柠萌昨天也反复找了一些版本对比功能，终于找到了功能几乎没有缺失广告几乎没有的版本</p><span class="hide-inline"><button type="button" class="hide-button" style="background-color: #FF7242;color: #fff">点我获取诶  </button><span class="hide-content">https://ningmengs-my.sharepoint.com/:u:/g/personal/lemonyds_ningmengs_onmicrosoft_com/EaVUkFZFCaNBo2awLja0d74ByWS-5593k-TUDzGNZwtrnA?e=MBzqiD</span></span><p>在群内的可以去云盘站直接输入密码下载(๑•̀ㅁ•́ฅ)<br><img src="https://s2.loli.net/2022/02/18/F3PScN5Lwd9BEyj.jpg" style="zoom:50%;" /><br><img src="https://s2.loli.net/2022/02/18/m2I87ifYHvWNlOX.jpg" style="zoom:50%;" /><br><img src="https://s2.loli.net/2022/02/18/yn2jC8NaDZVMef9.jpg" style="zoom:50%;" /><br>界面少了广告后终于还原了以前的感觉，功能也没有减少，看起来就舒服很多了。<br>嗯，本期就到这里。下篇文章见，拜拜啦了😊</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 网站部署 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>关于office365 e5开发者账户关闭双重验证（安全默认值）记录</title>
+      <link href="/archives/b4d66110/"/>
+      <url>/archives/b4d66110/</url>
+      
+        <content type="html"><![CDATA[<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><blockquote><p>今天在登录之前白嫖的e5账户发现登录不了了，真的绝望哇,由于微软对后期注册的e5账号自动开启了Authenticator验证由于柠萌刷机后导致软件丢失无法进行验证，所以变成了死循环 了😥</p></blockquote><p><img src="https://s2.loli.net/2022/02/18/yk8fivBrNLEHbKw.jpg" alt="图1"><br>电脑端登录需要验证而手机端安装Authenticator后登录同样需要验证，这里就进入了死循环，所以这个号也废掉了，还好没有存什么重要内容。<br><strong>柠萌今天教大家关闭这个登录验证避免发生这样的惨剧</strong></p><h2 id="教程开始"><a href="#教程开始" class="headerlink" title="教程开始"></a>教程开始</h2><h3 id="1-使用e5账户登录Azure-Active-Directory"><a href="#1-使用e5账户登录Azure-Active-Directory" class="headerlink" title="1.使用e5账户登录Azure Active Directory"></a>1.使用e5账户登录<a href="https://aad.portal.azure.com/">Azure Active Directory</a></h3><p><img src="https://s2.loli.net/2022/02/18/YVXzuFUAHE8s6LD.png" alt="图2"><br>正常进去后是<strong>仪表盘界面</strong><br><img src="https://s2.loli.net/2022/02/18/H6Pwx7apSOj8zQe.png" alt="图3"><br>接下来选择<strong>租户属性</strong><br><img src="https://s2.loli.net/2022/02/18/SYJBmNZ62iupqyC.png" alt="图4"><br>打开界面拉到最后点击<strong>管理安全默认值</strong><br><img src="https://s2.loli.net/2022/02/18/pGownySMg9Lmz2X.png" alt="图5"><br>在这个启用安全值界面后点击<strong>否</strong>即可，下次登录就不会在收到开启Authenticator验证码啦考虑😆</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>安装z-file网盘教程（通过宝塔面板）的测试</title>
+      <link href="/archives/d2bef6c/"/>
+      <url>/archives/d2bef6c/</url>
+      
+        <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>emmm，出这个教程的原因嘛，为了帮评论内的酷友的说 @(landeli) ，可能鸽了很久喵emmm，主要是因为没有Linux系统。<br>首先开始我们的搭建教程 </p><h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><blockquote><p>1.准备好一个安装好的宝塔面板（本教程暂不提供，后续可能会有教程）<br>2.配置jdk环境<br>3.主要是需要有服务器的鸭</p></blockquote><h2 id="前期安装所需要"><a href="#前期安装所需要" class="headerlink" title="前期安装所需要"></a>前期安装所需要</h2><p><strong>CentOS系统</strong></p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">yum install -y java-1.8.0-openjdk unzip</span><br></pre></td></tr></table></figure><p><strong>Debian 9 &#x2F; Ubuntu 14+</strong></p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">apt update</span><br><span class="line">apt install -y openjdk-8-jre-headless unzip</span><br></pre></td></tr></table></figure><p><strong>Debian 10 (Buster) 系统</strong></p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">apt update &amp;&amp; apt install -y apt-transport-https software-properties-common ca-certificates dirmngr gnupg</span><br><span class="line">wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -</span><br><span class="line">add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/</span><br><span class="line">apt update &amp;&amp; apt install -y adoptopenjdk-8-hotspot-jre</span><br></pre></td></tr></table></figure><p>额，debian10步骤要繁琐些，个人使用Ubuntu18.04 φ(*￣0￣)</p><p><img src="https://s2.loli.net/2022/02/15/2lVDThrSWRp9Egv.jpg" alt="安装过程"></p><h2 id="安装主体"><a href="#安装主体" class="headerlink" title="安装主体"></a>安装主体</h2><p>安装jdk环境后接着安装z-file主体项目啦</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd ~</span><br><span class="line">wget https://c.jun6.net/ZFILE/zfile-release.war</span><br><span class="line">mkdir zfile &amp;&amp; unzip zfile-release.war -d zfile &amp;&amp; rm -rf zfile-release.war</span><br><span class="line">chmod +x zfile/bin/*.sh</span><br></pre></td></tr></table></figure><p><img src="https://s2.loli.net/2022/02/15/Tp4ODHo3z8VL9RU.jpg" alt="安装过程2"><br>跑到这里就可以了喵(つ≧▽≦)つ，chmod赋权</p><p>接下来是启动命令</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">~/zfile/bin/start.sh </span><br></pre></td></tr></table></figure><p><img src="https://s2.loli.net/2022/02/15/Ajf1USZW7mLRriy.jpg" alt="安装过程3"><br>然后你的z-file就已经在运作了呐(≧▽≦)</p><p>如果是在内网或者图形化可食用<a href="http://127.0.0.1:8080/#/install">http://127.0.0.1:8080/#/install</a><br>进入安装向导</p><h2 id="疑难解决"><a href="#疑难解决" class="headerlink" title="疑难解决"></a>疑难解决</h2><p>如果出现以下错误，解决方法<br><img src="https://s2.loli.net/2022/02/15/UlA3I5ibC6rcqVy.jpg" alt="安装过程4"><br>在宝塔面板页面进入，安全&#x2F;防火墙中添加8080的端口号放行即可（在内网环境测试），如果是云主机腾讯云或者阿里云可能还需要控制台中放行端口。(つ≧▽≦)つ<br><img src="https://s2.loli.net/2022/02/15/ArjbEgXIsO6kZcV.jpg" alt="安装过程6"><br>进入到安装页面后即可配置账号网站名称等<br><img src="https://s2.loli.net/2022/02/15/bvWnCyh26lo9isx.jpg" alt="安装过程7"><br>进入页面后提示需要添加驱动器<br><img src="https://s2.loli.net/2022/02/15/GMNVvdqkAsQWxSu.jpg" alt="安装过程8"><br>可以添加的网盘蛮多的，可以进行设置部署<br>emmm，我也是第一次装的喵，功能蛮多的喵<br><img src="https://s2.loli.net/2022/02/15/qln8Oa7pNXZTFb1.jpg" alt="安装过程9"><br>嗯，就这样，今天的安装教程结束啦，酷友们，你们学废了嘛⊂(・﹏・⊂)（说实话本期教程难度并不高，相信大家们很快就能部署好。）<br><a href="https://github.com/zhaojun1998/zfile">点我即可传送喵</a>这个是来自z-file git源地址</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 网站部署 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>解决谷歌负一屏无法显示文章的问题</title>
+      <link href="/archives/d8199f01/"/>
+      <url>/archives/d8199f01/</url>
+      
+        <content type="html"><![CDATA[<div class="note info flat"><p>各位在原生&#x2F;类原生的大佬们是不是有这样的问题，我的谷歌负一屏为什马不显示新闻消息 ？(* ￣︿￣)</p></div><p>如图所示<br><img src="https://s2.loli.net/2022/02/15/kmY9VeDjs5Fp3Rx.jpg" alt="如图所示"></p><div class="note success flat"><p>这是因为由于国内各种因素，谷歌已经关闭了对中国的位置信息提交导致出现无法获取到文章内容的原因。</p></div><p>解决方法也是很容易哒😋</p><p><strong>教程开始</strong><br>首先需要安装好magisk框架，否则是无法配置的。如果不了解如何安装请移步到百度&#x2F;酷安&#x2F;b站中有详细教程。</p><p><strong>下载的zip包请直接刷入magisk中</strong><br><strong>下载地址：</strong><a href="https://ningmengs-my.sharepoint.com/:f:/g/personal/lemonyds_ningmengs_onmicrosoft_com/EgbVxyMqzn1Gskc7LLk9kcABDOFoP_7YnXAY1-DhjahpyQ?e=S2PHdz">点我即可下载鸭</a><br><strong>附件密码</strong>：</p><span class="hide-inline"><button type="button" class="hide-button" style="background-color: #FF7242;color: #fff">点我获取诶  </button><span class="hide-content">fgbv</span></span><p><img src="https://s2.loli.net/2022/02/15/wVcKoJHNTSAa8ft.png" alt="如图所示"></p><p>然后安装好下载的安装包文件</p><p><img src="https://s2.loli.net/2022/02/15/d9GinBzN7ZHkhLs.png" alt="如图所示"><br>软件打开后将前三个选项打勾后获取root权限，手机将进行重启。<br><img src="https://s2.loli.net/2022/02/15/185iDvUnKyQekmF.png" alt="Google"></p><blockquote><p>建议开机后清理一下Google的数据!</p></blockquote><p>这时如果刷新负一屏后你发现已经可以刷新出文章了那么恭喜你已经成功啦 😊<br><img src="https://s2.loli.net/2022/02/15/LPZWxgDC8o2NS1e.png" alt="Screenshot_20210813-074910.png"><br>打教程不易，欢迎在评论区下发送你的留言。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 搞机折腾 </tag>
+            
+            <tag> 原创 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>旧机搞机篇，将kingroot替换为supersu</title>
+      <link href="/archives/3dbd4859/"/>
+      <url>/archives/3dbd4859/</url>
+      
+        <content type="html"><![CDATA[<div class="note info flat"><p>本教程不仅适用于手机，也可用于电视盒子的root替换教程😊</p></div><p>今天不知哪来的念头翻出了我珍藏许久的老古董，决定折腾一波好好把玩一下<br><img src="https://s2.loli.net/2022/02/15/gYnRNb4a2u8PfCS.jpg" alt="HTC"><br><img src="https://s2.loli.net/2022/02/15/SnKDBAV4QvzlRWJ.jpg" alt="kingroot"><br>映入眼帘的kingroot可是当年的毒瘤之王，预装上后不仅通知栏会弹广告，自己还会设置为系统程序还会篡改apk安装器并在安装器中放广告简直离谱的一批，首先让我们来好好的解决掉它 </p><div class="note warning flat"><p>由于柠萌刚才在测试中发现，kingroot的版本过高会导致替换失败崩溃现象发生，需要降级版本，请根据教程来一步步走</p></div><p>首先下载好两个APP文件(<strong>包括kingroot降级版和替换工具</strong>)<br><strong>下载链接</strong>：<a href="https://ningmengs-my.sharepoint.com/:f:/g/personal/lemonyds_ningmengs_onmicrosoft_com/Evx5hAjhpRxHtYG-UZdMs00Bsodz5rE9vriTSrLWIEO4oA?e=SdcbNb">点我即可鸭ヾ(≧∇≦*)ゝ</a><br><strong>附件密码</strong>: </p><span class="hide-inline"><button type="button" class="hide-button" style="background-color: #FF7242;color: #fff">点我获取诶  </button><span class="hide-content">dfzq</span></span><p><img src="https://s2.loli.net/2022/02/15/FcMnkyjv3SeWuY5.jpg" alt="图标1"><br>打开打开这个APP后弹出kingroot授权对话框点击允许，软件将黑屏后闪退。<br><img src="https://s2.loli.net/2022/02/15/AUlq6DkJmLVFsui.jpg" alt="IMG_2021-07-29-22-09-09-623.jpg"><br>此时桌面将多出supersu APP，点开后配置二进制文件选择常规更新，如果一切正常将弹出安装成功提示，如图所示 @(landeli)<br><img src="https://s2.loli.net/2022/02/15/8sYu19adftCckwI.jpg" alt="成功提示"><br><strong>之后先不要着急重启系统，先卸载掉kingrootAPP以免被再次占用的可能</strong><br><img src="https://s2.loli.net/2022/02/15/5eqBja6wkmNgD2o.jpg" alt="如图所示"><br>卸载后重启手机即可替换成功啦 @(landeli) </p><p><img src="https://s2.loli.net/2022/02/15/sEBcqiJkGOdPlwY.jpg" alt="成功图2"><br>好啦，本期教程就到这里结束啦，欢迎大家在评论区下留言，如果有什么不明白或者有误欢迎在博客评论区反馈，我会留意每一条评论哒  😉</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 搞机折腾 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>ご注文はうさぎですか？点兔闹钟</title>
+      <link href="/archives/166b9040/"/>
+      <url>/archives/166b9040/</url>
+      
+        <content type="html"><![CDATA[<h2 id="动漫资源搬运第一期，欢迎大家来访"><a href="#动漫资源搬运第一期，欢迎大家来访" class="headerlink" title="动漫资源搬运第一期，欢迎大家来访"></a>动漫资源搬运第一期，欢迎大家来访</h2><p><strong>这期给大家带来点兔福利，点兔闹钟系列</strong><br>此作品为优质芳文社动漫付费资源作品<br>在设定好闹钟后会有可爱的智乃老婆叫你起床，想想都香诶 (╹ڡ╹ )<br>这个系列中其中概括了，智乃，心爱，千夜，理世，纱路等，全部点兔人物<br><strong>柠萌自测有准点报时，闹钟定时和延迟提醒功能，可以使用里面预设的lp们的声音😋</strong><br><img src="https://s2.loli.net/2022/02/15/9aFpRf6tVeJ4NOu.jpg" alt="图片1"><br>软件如图所示<br><img src="https://s2.loli.net/2022/02/15/IQOTaFYyiAKzjcZ.jpg" alt="图片2"></p><p><strong>下载链接</strong>：<a href="https://ningmengs-my.sharepoint.com/:f:/g/personal/lemonyds_ningmengs_onmicrosoft_com/EtOZYuKgneVBk_LTjPZg7bQBM5gsPn_y-MPs1hULJtOpdQ?e=mSnfjO">点我即可鸭ヾ(≧∇≦*)ゝ</a><br><strong>附件密码</strong>:</p><span class="hide-inline"><button type="button" class="hide-button" style="background-color: #FF7242;color: #fff">点我获取诶  </button><span class="hide-content">rthjm</span></span>]]></content>
+      
+      
+      <categories>
+          
+          <category> 原创 </category>
+          
+          <category> 桜紺狸の动漫资源库 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 动漫资源 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>一键解决typecho国内评论头像无法加载的问题</title>
+      <link href="/archives/e877a0cf/"/>
+      <url>/archives/e877a0cf/</url>
+      
+        <content type="html"><![CDATA[<blockquote><p>刚刚在搭建博客的时候发现评论区无法显示图片发现头像源被墙，给大家找到了解决办法，<strong>无需插件</strong>仅需复制下面的代码即可呀</p></blockquote><p>首先找到目录，可以用ssh或者ftp进入到网站目录**&#x2F;var&#x2F;Typecho&#x2F;Common.php目录下**<br>打开这个文件后，搜索关键字或下滑慢慢找到<strong>获取gravatar头像地址</strong>这个位置<br><img src="https://s2.loli.net/2022/02/15/xCnXATWkZzFS8jt.png" alt="位置"><br>替换掉下面的代码，替换为</p><figure class="highlight php"><table><tr><td class="code"><pre><span class="line">*/</span><br><span class="line"><span class="keyword">public</span> <span class="built_in">static</span> <span class="function"><span class="keyword">function</span> <span class="title">gravatarUrl</span>(<span class="params"><span class="variable">$mail</span>, <span class="variable">$size</span>, <span class="variable">$rating</span>, <span class="variable">$default</span>, <span class="variable">$isSecure</span> = <span class="literal">false</span></span>)</span></span><br><span class="line"><span class="function">   </span>&#123;</span><br><span class="line">       <span class="variable">$reg</span> = <span class="string">&quot;/^\d&#123;5,11&#125;@[qQ][Qq]\.(com)$/&quot;</span>;</span><br><span class="line">       <span class="keyword">if</span> (<span class="title function_ invoke__">preg_match</span>(<span class="variable">$reg</span>, <span class="variable">$mail</span>)) &#123;</span><br><span class="line">           <span class="variable">$img</span>    = <span class="title function_ invoke__">explode</span>(<span class="string">&quot;@&quot;</span>, <span class="variable">$mail</span>);</span><br><span class="line">           <span class="variable">$url</span> = <span class="string">&quot;//q2.qlogo.cn/headimg_dl?dst_uin=<span class="subst">&#123;$img[0]&#125;</span>&amp;spec=100&quot;</span>;</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">           <span class="keyword">if</span> (<span class="title function_ invoke__">defined</span>(<span class="string">&#x27;__TYPECHO_GRAVATAR_PREFIX__&#x27;</span>)) &#123;</span><br><span class="line">               <span class="variable">$url</span> = __TYPECHO_GRAVATAR_PREFIX__;</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="variable">$url</span> = <span class="variable">$isSecure</span> ? <span class="string">&#x27;https://sdn.geekzu.org/avatar/&#x27;</span> : <span class="string">&#x27;https://sdn.geekzu.org/avatar/&#x27;</span>;</span><br><span class="line">               <span class="variable">$url</span> .= <span class="string">&#x27;/&#x27;</span>;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">if</span> (!<span class="keyword">empty</span>(<span class="variable">$mail</span>)) &#123;</span><br><span class="line">               <span class="variable">$url</span> .= <span class="title function_ invoke__">md5</span>(<span class="title function_ invoke__">strtolower</span>(<span class="title function_ invoke__">trim</span>(<span class="variable">$mail</span>)));</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="variable">$url</span> .= <span class="string">&#x27;?s=&#x27;</span> . <span class="variable">$size</span>;</span><br><span class="line">           <span class="variable">$url</span> .= <span class="string">&#x27;&amp;amp;r=&#x27;</span> . <span class="variable">$rating</span>;</span><br><span class="line">           <span class="variable">$url</span> .= <span class="string">&#x27;&amp;amp;d=&#x27;</span> . <span class="variable">$default</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> <span class="variable">$url</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure><p><strong>只修改获取头像地址下面这一个段落</strong>  保存即可查看效果 😊</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 网站部署 </tag>
+            
+            <tag> 博客维护 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>刷机基础教程之-------通过adb命令刷入第三方rec</title>
+      <link href="/archives/5ec9035e/"/>
+      <url>/archives/5ec9035e/</url>
+      
+        <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><strong>最近很多新手搞机佬咨询我解除bl后不知道如何刷入第三方rec，今天我就教大家一个比较简单的刷入rec的方式，要仔细学哇٩(๑&gt;◡&lt;๑)۶</strong></p><h2 id="步骤开始"><a href="#步骤开始" class="headerlink" title="步骤开始"></a>步骤开始</h2><div class="note info flat"><p>首先需要准备的工具有，电脑一台  😉 ，adb安装环境exe文件（稍后会有下载链接）</p></div><h3 id="第一步"><a href="#第一步" class="headerlink" title="第一步"></a>第一步</h3><p>打开并下载后的exe文件<br><strong>资源下载</strong>：</p><div class="btn-center"><a class="btn-anzhiyu outline blue larger" href="https://ningmengs-my.sharepoint.com/:f:/g/personal/lemonyds_ningmengs_onmicrosoft_com/EqV4c4hmZmBFvu5y50h73UgBnk_EMF98r6KzWkdcjMKIRQ?e=I84Q1e"   title="点我直连诶"><i class="fas fa-cloud-download"></i><span>点我直连诶</span></a></div><p> <strong>网盘密码</strong>：</p> <span class="hide-inline"><button type="button" class="hide-button" style="background-color: #FF7242;color: #fff">点我获取  </button><span class="hide-content">qxcva</span></span><img src="https://s2.loli.net/2022/02/12/iuOThs8K64ZL51v.png" alt="安装过程1"  /><p>打开后会弹出蓝色对话框请按照提示进行操作，选项输入y即可（可能上图有些看不清，敬请谅解( Ĭ ^ Ĭ )）</p><blockquote><p>按照软件内提示操作安装后会在C盘内看到adb文件夹，文件夹有adb和fastboot环境，如下图所示即为安装成功(～￣▽￣)～</p></blockquote><p><img src="https://s2.loli.net/2022/02/12/DjWR5HKe3UFJdbh.png" alt="安装后示意图"></p><h3 id="第二步"><a href="#第二步" class="headerlink" title="第二步"></a>第二步</h3><p>下载好第三方rec，如果是twrp请把img文件下载好，放在D盘或者其他盘符并新创建一个文件夹名称为recovery（默认演示放在D盘）</p><blockquote><p>如果是橙狐rec请解压后后提取recovery.img文件创建文件夹并解压到文件夹内如图所示</p></blockquote><p>​    <img src="https://s2.loli.net/2022/02/12/4qAkMatnTJBgPZN.png" alt="第二步" style="zoom: 33%;" /></p><blockquote><p>请确保创建的recovery文件夹中包括recovery的img文件</p></blockquote><h3 id="第三步"><a href="#第三步" class="headerlink" title="第三步"></a>第三步</h3><p>然后win+r键打开运行窗口输入cmd，打开命令提示框窗口<br><img src="https://s2.loli.net/2022/02/12/rk9SNU1fCwbn5vW.png" alt="命令提示符"><br>此时将手机长按开机键加音量减按键进入fastboot模式 😋</p><p><img src="https://s2.loli.net/2022/02/12/2oSmzHOjWDGbIy7.jpg" alt="fastboot演示"></p><p>接下来电脑进行操作，默认我把文件放到了D盘</p><h3 id="第四步"><a href="#第四步" class="headerlink" title="第四步"></a>第四步</h3><p>命令行输入</p><pre><code>D:</code></pre><p>并回车，此时进入到D盘，其他盘符同理<br><img src="https://s2.loli.net/2022/02/12/ecJsbg7kQFHrNoE.png" alt="演示1"></p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#输入</span><br><span class="line">cd recovery</span><br><span class="line">#后就进入到文件夹内了,接下来输入</span><br><span class="line">fastboot flash recovery recovery.img</span><br></pre></td></tr></table></figure><p>后提示OKAY [ 0.545s]<br>finished. total time: 3.335s的字符后即为刷入成功，长按电源键加音量加即可进入recovery模式啦<br><img src="https://s2.loli.net/2022/02/12/gtFMKBGA2mpTiox.jpg" alt="成功示意图"></p><h2 id="miui系列加固rec步骤"><a href="#miui系列加固rec步骤" class="headerlink" title="miui系列加固rec步骤"></a>miui系列加固rec步骤</h2><div class="note warning flat"><p>需要注意的是，如果你是miui官方系统，那么为了重启后避免回到官方的recovery，你还需要在刷完rec后不要直接进入系统，在rec里面重新执行刷入操作</p></div><blockquote><p>如果是橙狐rec直接进入recovery刷入zip包即可完成加固，如果是twrp之类img文件在rec内找到文件后点击刷入选项为“img”后滑动进行刷入</p></blockquote><p>好啦教程结束啦 😋 ，刚才敲教程的时候出现了点小插曲，没有保存稿子导致内容没有保存上又重新写了第二遍╥﹏╥</p><h2 id="关于博客迁移"><a href="#关于博客迁移" class="headerlink" title="关于博客迁移"></a>关于博客迁移</h2><p>此文章大概是去年写的吧，目前还在努力迁移博客文章到分站，由于架构问题每篇文章都需要重新敲写，大概会花费大量时间配置。在这次构建中学到了许多未接触过的内容，也经历了许多挑战，可以说痛并快乐着叭<br>2022&#x2F;2&#x2F;12 日开始迁入文章 by柠萌</p><h2 id="本次问题修复日志"><a href="#本次问题修复日志" class="headerlink" title="本次问题修复日志"></a>本次问题修复日志</h2><div class="timeline pink"><div class='timeline-item headline'><div class='timeline-item-title'><div class='item-circle'><p>2022</p></div></div></div><div class='timeline-item'><div class='timeline-item-title'><div class='item-circle'><p>02-08</p></div></div><div class='timeline-item-content'><p>修复图片在主站无法加载的问题</p></div></div></div><p>如果有其它问题欢迎在评论区留言给柠萌，内容如有问题欢迎大佬来指正</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 搞机折腾 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>类原生ROM美化教程---------让原生界面焕发新生(～￣▽￣)～</title>
+      <link href="/archives/8024b874/"/>
+      <url>/archives/8024b874/</url>
+      
+        <content type="html"><![CDATA[<div class="note warning flat"><p>本期教程为安卓11之前可适用，部分安卓12也可参考但比如一加桌面模块将失效，请勿尝试安装！</p></div><h2 id="正片介绍"><a href="#正片介绍" class="headerlink" title="正片介绍"></a>正片介绍</h2><p>类原生不适应非本地化以及较为简陋的桌面，可能刚开始从miui以及各种国产ui接触的小伙伴会出现明显的抵制和不适应感，柠萌出了这期教程希望能减轻初次使用类原生的不适感和美化类原生的界面希望能让你爱上它！😋</p><h2 id="推荐应用一"><a href="#推荐应用一" class="headerlink" title="推荐应用一"></a>推荐应用一</h2><p>来自一加桌面的magisk模块</p><div class="note info flat"><p>推荐原因：功能界面如图所示界面可以自定义图标，负一屏有动态的天气显示(￣～￣)，后台有比较清晰的后台显示占用以及后台可以进行任务上锁和固定等更多功能</p></div><p><img src="https://s2.loli.net/2022/02/15/rnzSQF1umjd5vhf.png" alt="图例1"><img src="https://s2.loli.net/2022/02/15/TgOd2qlysSQ4mcC.png" alt="图例"><img src="https://s2.loli.net/2022/02/15/9vAQVZs2m6WxEOP.png" alt="图例"></p><p><strong>以上文件下载地址</strong>：</p><div class="btn-center"><a class="btn-anzhiyu outline blue larger" href="https://ningmengs-my.sharepoint.com/:f:/g/personal/lemonyds_ningmengs_onmicrosoft_com/EvNEahTNtMtHnhcb9L79EDsB4zJ8kTm4cg8JH0I8SYKdhA?e=iplB6x"   title="点我直连诶"><i class="fas fa-cloud-download"></i><span>点我直连诶</span></a></div><p>网盘密码：</p><span class="hide-inline"><button type="button" class="hide-button" style="background-color: #FF7242;color: #fff">点我获取诶  </button><span class="hide-content">rtyvb</span></span><blockquote><p>需要配合下载链接内一加天气：<strong>不安装在负一屏中不显示天气信息。</strong>此版本只能用于gps定位城市不能够自选，但是柠萌觉得老版本界面蛮好看的所以就搬运了来 ,以及一加时钟部件.</p></blockquote><h2 id="推荐应用二："><a href="#推荐应用二：" class="headerlink" title="推荐应用二："></a>推荐应用二：</h2><div class="note warning flat"><p>旧应用下架警告</p></div><p><del>由于酷安下架之前的日历app应用，原app无法找到，将采用新app替代。</del> 2022&#x2F;2&#x2F;15</p><p>来自酷安大佬之手的app，日历mini</p><img src="https://s2.loli.net/2022/02/15/4g2zUAH5P6dO1DE.png" style="zoom: 25%;" /><blockquote><p>柠萌点评：<strong>界面很简洁，国内由于无法使用谷歌全家桶。柠萌认为可以替换掉谷歌日历呢，没有广告有天气显示，可以设置提醒可以自定义颜色设置。</strong></p></blockquote><p><strong>下载地址</strong>：<a href="https://www.coolapk.com/apk/top.soyask.calendarii">点击即可跳转酷安下载</a></p><h2 id="推荐应用三："><a href="#推荐应用三：" class="headerlink" title="推荐应用三："></a>推荐应用三：</h2><p>同样是来自酷安大佬之手的 apk安装器</p><p><img src="https://s2.loli.net/2022/02/15/jMFuczZNKHmTApl.png" alt="apk安装器图例"></p><blockquote><p>柠萌点评：<strong>界面清爽简洁，可以完美的替换原生安装器</strong></p></blockquote><p><strong>下载地址</strong>：<a href="https://www.coolapk.com/apk/com.tokyonth.installer">点击即可跳转酷安下载地址 </a></p><h2 id="推荐图标包：MBE-Style"><a href="#推荐图标包：MBE-Style" class="headerlink" title="推荐图标包：MBE Style"></a>推荐图标包：MBE Style</h2><blockquote><p>柠萌点评：图标炒鸡可爱，可以尝试一下，大概用了好几年一直没换过 </p></blockquote><img src="https://s2.loli.net/2022/02/15/juqVZPU6WECfia3.jpg" style="zoom:33%;" /><p><strong>下载链接</strong>：<a href="https://www.coolapk.com/apk/me.iacn.mbestyle">点击跳转酷安下载链接</a></p><h2 id="类原生rom功能配置"><a href="#类原生rom功能配置" class="headerlink" title="类原生rom功能配置"></a>类原生rom功能配置</h2><div class="note warning flat"><p>最后介绍原生ROM更换主题颜色，状态栏图标以及系统桌面图标样式（有些ROM可能有所缺失并没有这个功能）</p></div><p><strong>第一步：长按并点击壁纸</strong><br><img src="https://s2.loli.net/2022/02/15/YKtH1qfLxo9PAeO.png" alt="第一步"><br><strong>第二步：点击样式和壁纸</strong><br><img src="https://s2.loli.net/2022/02/15/vBwsFoVTucnExQj.png" alt="第二步"><br><strong>第三步：选择自定义</strong><br><img src="https://s2.loli.net/2022/02/15/2OHgFPUvB8estwu.png" alt="第三步图片"><br>这样的话就可以进行，自定义图标以及字体和主题颜色啦  😊<br><img src="https://s2.loli.net/2022/02/15/HkTAKnvBPLQeiwa.png" alt="如图所示"><img src="https://s2.loli.net/2022/02/15/DPibFlSn15vdaBK.png" alt="如图所示"><br>好啦，原生美化教程到这里就结束啦，谢谢大家的观看，希望大家不要白嫖，看过的发个评论o(<em>￣▽￣</em>)o<br>下一期的教程——–柠萌还没想好，如果这期教程有人看的话，尽量会发一些实用教程滴，那就下期再见，拜拜</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 搞机折腾 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>解决miui12.5 无法安装gms的问题(ノ￣▽￣)＋小白安装面具的详细教程鸭</title>
+      <link href="/archives/32e7f725/"/>
+      <url>/archives/32e7f725/</url>
+      
+        <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote><p>哈喽大家好，柠萌又来更新啦，今天起床的时候翻了一下小米社区都在说手动安装gms后出现停止运行的问题，但是我的红米note9pro 12.5 21.1.28并没有这个问题，为了解决大家的问题，强烈的好奇心得驱使下我更新到了昨天刚发布的21.2.3的版本结果，play服务就开始疯狂的停止运行。(ㄒoㄒ)</p></blockquote><p>如图 </p><p><img src="https://s2.loli.net/2022/02/15/3MOYqhSkia4G2dQ.jpg" alt="图片1"><br>既然可以解bl那么这个它就不算个问题(｀・ω・´)<br>所以那就开始今天教程叭 ☺</p><div class="note warning flat"><p>此教程需要安装面具magisk模块，会影响ota的更新所以，如果完全不会折腾的小白强烈不建议获取面具操作，出现任何问题柠萌不承担后果。不会刷入rec和救砖的不建议看其他大佬的教程😋</p></div><p><strong>如果已经有面具模块的大佬可以直接看第五步即可</strong></p><blockquote><p>如果更新之前已自行安装了gms框架，请务必卸载后进行操作</p></blockquote><h2 id="步骤开始"><a href="#步骤开始" class="headerlink" title="步骤开始"></a>步骤开始</h2><h3 id="第一步"><a href="#第一步" class="headerlink" title="第一步"></a>第一步</h3><p><img src="https://s2.loli.net/2022/02/15/GgHDy7BsXrFMPLh.jpg" alt="图片2"><br>打开授权管理开启root</p><h3 id="第二步"><a href="#第二步" class="headerlink" title="第二步"></a>第二步</h3><p>酷安搜索magisk 并安装  @(chaiquan) </p><h3 id="第三步"><a href="#第三步" class="headerlink" title="第三步"></a>第三步</h3><p>打开magisk后会提示被拒绝root权限，然后去给与即可</p><h3 id="第四步"><a href="#第四步" class="headerlink" title="第四步"></a>第四步</h3><p>进入magisk点击直接安装重启手机即可<br><img src="https://s2.loli.net/2022/02/15/NbtIF6fRGnm4MEx.jpg" alt="图片3"></p><h3 id="第五步安装模块"><a href="#第五步安装模块" class="headerlink" title="第五步安装模块"></a>第五步安装模块</h3><p>安装好gms模块，已放入盘站点击下方链接即可下载(≧∇≦)&#x2F;<a href="https://ningmengs-my.sharepoint.com/:f:/g/personal/lemonyds_ningmengs_onmicrosoft_com/En_Cgpv2bsFJqXQUzTe3XR4BhvDNEZsi6Grb9I6RUIW3gQ?e=WuCNyP">点我即可下载啦</a></p><p>网盘密码：</p><span class="hide-inline"><button type="button" class="hide-button" style="background-color: #FF7242;color: #fff">点我获取诶  </button><span class="hide-content">yopvb</span></span><h3 id="第六步"><a href="#第六步" class="headerlink" title="第六步"></a>第六步</h3><p>打开面具导入模块<br><img src="https://s2.loli.net/2022/02/15/fOIhAD85oWYmzVB.jpg" alt="图片4"><br>重启即可正常使用啦٩(๑&gt;◡&lt;๑)۶</p><p>目前存在的bug有，每次重启后出现两次play服务停止运行，无视即可<br><img src="https://s2.loli.net/2022/02/15/RFa2KWUugLf9CkP.jpg" alt="图片5"><br>效果如图所示(￣▽￣)~*成功啦</p><p>祝大家小年快乐，搞机愉快  by2021 <strong>柠萌</strong><br><strong>(转发为旧版博客文章)</strong></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 搞机折腾 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>给你的ticwear增加微信回复功能 e/s/2</title>
+      <link href="/archives/1d51d142/"/>
+      <url>/archives/1d51d142/</url>
+      
+        <content type="html"><![CDATA[<p>本期合作<a href="https://www.coolapk.com/u/3145885">@明风の岗</a></p><p>首先准备的工具有Nevolution，微信一个 </p><p><a href="https://www.coolapk.com/apk/com.oasisfeng.nevo">点我即可获取下载地址</a><br><img src="https://s2.loli.net/2022/02/15/EH9oxcTia2ZCY1N.jpg" alt="软件界面1"><br>进来的界面这样的，第一步，给好软件的所有权限后找到微信通知增强 @(landeli)<br><img src="https://s2.loli.net/2022/02/15/EH9oxcTia2ZCY1N.jpg" alt="软件界面2"><br>第二步，按照上图操作即可，打开wear os(实验性)那块。<br><img src="https://s2.loli.net/2022/02/15/OyPIfZewQFrkSnT.jpg" alt="成功图"><br>成功的话，手表就可以推送上面的通知了并可以回复 (￣▽￣)”<br>如果你有root的话回到第一步打开内源模式就可以已原始应用的形式推送<br>好啦，教程就完毕喽，有什么问题的话可以评论区回复就阔以了 😋</p><blockquote><p>本教程写于2020 4&#x2F;29 by柠萌</p></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> 桜紺狸の折腾记录 </category>
+          
+          <category> 原创 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> wearOS </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+  
+  
+</search>
